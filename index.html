@@ -4,12 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>קורס עזרה ראשונה נפשית</title>
-  <!-- React & Babel CDN -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 0; padding: 1rem; background: #f3f4f6; }
+    body { font-family: sans-serif; margin: 0; padding: 1rem; background: #f3f4f6; direction: rtl; }
     .card { background: #fff; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
     .chat-container { max-height: 300px; overflow-y: auto; margin-bottom: 0.5rem; }
     .chat-input { display: flex; }
@@ -44,13 +43,11 @@
       };
       return (
         <div className="card">
-          <h2>תמיכה אישית</h2>
+          <h2>שיחה תומכת</h2>
           <div className="chat-container">
             {messages.map((m, i) => (
               <div key={i} style={{ textAlign: m.sender === 'user' ? 'right' : 'left' }}>
-                <span style={{ display: 'inline-block', padding: '0.5rem', background: m.sender === 'user' ? '#bfdbfe' : '#e5e7eb', borderRadius: '0.25rem', margin: '0.25rem 0' }}>
-                  {m.text}
-                </span>
+                <span style={{ display: 'inline-block', padding: '0.5rem', background: m.sender === 'user' ? '#bfdbfe' : '#e5e7eb', borderRadius: '0.25rem', margin: '0.25rem 0' }}>{m.text}</span>
               </div>
             ))}
           </div>
@@ -69,55 +66,68 @@
 
     function App() {
       const [messages, setMessages] = React.useState([]);
+      const [step, setStep] = React.useState(0);
+      const [subStep, setSubStep] = React.useState(0);
       const [videoEnded, setVideoEnded] = React.useState(false);
 
-      const handleSend = async (text) => {
-        const userMsg = { sender: 'user', text };
-        const history = [...messages, userMsg];
-        setMessages(history);
+      const questions = [
+        "איך הרגשת במהלך הצפייה?",
+        "איזו סצנה נגעה בך במיוחד?",
+        "מה לדעתך היה המסר המרכזי?"
+      ];
 
-        try {
-          const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer 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'
-            },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: [
-                { role: 'system', content: 'אתה מתעניין על סרט לעזרה נפשית שהמשתמש כרגע ראה. שמור על טון תומך וענייני אחרי 5 שאלות סכם בקצרה.' },
-                ...history.map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }))
-              ]
-            })
-          });
-          const data = await res.json();
-          const reply = data.choices?.[0]?.message?.content || 'אין תשובה זמינה.';
-          const botMsg = { sender: 'bot', text: reply };
-          setMessages(prev => [...prev, botMsg]);
-        } catch (err) {
-          console.error(err);
-          const errorMsg = { sender: 'bot', text: 'אירעה שגיאה בשליחת השאלה.' };
-          setMessages(prev => [...prev, errorMsg]);
+      const sendToOpenAI = async (prompt, userText) => {
+        const res = await fetch('chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, userText })
+        });
+        const data = await res.json();
+        return data.text;
+      };
+
+      const handleSend = async (text) => {
+        setMessages(prev => [...prev, { sender: 'user', text }]);
+
+        if (subStep === 0) {
+          const followup = await sendToOpenAI(
+            "אתה מדריך רגשי. שאל שאלה מותאמת אישית לפי מה שהמשתמש כתב. רק שאלה, בלי הקדמות.תתיחס לעובדה שהוא ענה לשאלה מהסרט",
+            text
+          );
+          setMessages(prev => [...prev, { sender: 'bot', text: followup }]);
+          setSubStep(1);
+        } else if (subStep === 1) {
+          const feedback = await sendToOpenAI(
+            ". אתה מדריך רגשי. הגב בקצרה, בצורה תומכת, אמפתית ולא שיפוטית. שורה אחת בלבד. בלי שאלות",
+            text
+          );
+          const next = questions[step];
+          const botMessages = [{ sender: 'bot', text: feedback }];
+          if (next) botMessages.push({ sender: 'bot', text: next });
+
+          setMessages(prev => [...prev, ...botMessages]);
+          setStep(prev => prev + 1);
+          setSubStep(0);
         }
       };
 
-      const onVideoEnded = () => {
-        setVideoEnded(true);
-        // שולח הודעת בוט ראשונה למשתמש
-        setMessages(prev => [...prev, { sender: 'bot', text: 'איך היה הסרט?' }]);
-      };
+      React.useEffect(() => {
+        if (step === 0 && subStep === 0) {
+          setMessages([{ sender: 'bot', text: questions[0] }]);
+          setStep(1);
+        }
+      }, []);
 
       return (
         <div>
-          <h1>קורס עזרה ראשונה נפשית</h1>
-          <VideoModule title="מודול 1: סימני מצוקה" videoUrl="module1.mp4" onEnded={onVideoEnded} />
+          <h1>שיחה תומכת</h1>
+          <VideoModule title="מודול 1: סימני מצוקה" videoUrl="module1.mp4" onEnded={() => setVideoEnded(true)} />
           {videoEnded && <ChatInterface messages={messages} onSend={handleSend} />}
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
   </script>
 </body>
 </html>
