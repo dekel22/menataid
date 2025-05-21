@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>קורס עזרה ראשונה נפשית</title>
+  <!-- React & Babel CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 1rem; background: #f3f4f6; }
+    .card { background: #fff; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+    .chat-container { max-height: 300px; overflow-y: auto; margin-bottom: 0.5rem; }
+    .chat-input { display: flex; }
+    .chat-input input { flex: 1; padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.25rem 0 0 0.25rem; }
+    .chat-input button { padding: 0.5rem 1rem; border: none; background: #3b82f6; color: #fff; border-radius: 0 0.25rem 0.25rem 0; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    function VideoModule({ title, videoUrl, onEnded }) {
+      return (
+        <div className="card">
+          <h2>{title}</h2>
+          <video
+            src={videoUrl}
+            controls
+            style={{ width: '100%', borderRadius: '0.5rem' }}
+            onEnded={onEnded}
+          />
+        </div>
+      );
+    }
+
+    function ChatInterface({ messages, onSend }) {
+      const [input, setInput] = React.useState('');
+      const sendMessage = () => {
+        const trimmed = input.trim();
+        if (!trimmed) return;
+        onSend(trimmed);
+        setInput('');
+      };
+      return (
+        <div className="card">
+          <h2>תמיכה אישית</h2>
+          <div className="chat-container">
+            {messages.map((m, i) => (
+              <div key={i} style={{ textAlign: m.sender === 'user' ? 'right' : 'left' }}>
+                <span style={{ display: 'inline-block', padding: '0.5rem', background: m.sender === 'user' ? '#bfdbfe' : '#e5e7eb', borderRadius: '0.25rem', margin: '0.25rem 0' }}>
+                  {m.text}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="chat-input">
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="כתוב הודעה..."
+              onKeyDown={e => e.key === 'Enter' && sendMessage()}
+            />
+            <button onClick={sendMessage}>שלח</button>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [messages, setMessages] = React.useState([]);
+      const [videoEnded, setVideoEnded] = React.useState(false);
+
+      const handleSend = async (text) => {
+        const userMsg = { sender: 'user', text };
+        const history = [...messages, userMsg];
+        setMessages(history);
+
+        try {
+          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer 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'
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: 'אתה מתעניין על סרט לעזרה נפשית שהמשתמש כרגע ראה. שמור על טון תומך וענייני אחרי 5 שאלות סכם בקצרה.' },
+                ...history.map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }))
+              ]
+            })
+          });
+          const data = await res.json();
+          const reply = data.choices?.[0]?.message?.content || 'אין תשובה זמינה.';
+          const botMsg = { sender: 'bot', text: reply };
+          setMessages(prev => [...prev, botMsg]);
+        } catch (err) {
+          console.error(err);
+          const errorMsg = { sender: 'bot', text: 'אירעה שגיאה בשליחת השאלה.' };
+          setMessages(prev => [...prev, errorMsg]);
+        }
+      };
+
+      const onVideoEnded = () => {
+        setVideoEnded(true);
+        // שולח הודעת בוט ראשונה למשתמש
+        setMessages(prev => [...prev, { sender: 'bot', text: 'איך היה הסרט?' }]);
+      };
+
+      return (
+        <div>
+          <h1>קורס עזרה ראשונה נפשית</h1>
+          <VideoModule title="מודול 1: סימני מצוקה" videoUrl="module1.mp4" onEnded={onVideoEnded} />
+          {videoEnded && <ChatInterface messages={messages} onSend={handleSend} />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
