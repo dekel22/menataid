@@ -111,12 +111,21 @@
         }
       };
 
-      React.useEffect(() => {
-        if (step === 0 && subStep === 0) {
-          setMessages([{ sender: 'bot', text: questions[0] }]);
-          setStep(1);
-        }
-      }, []);
+     React.useEffect(() => {
+  // קריאה לבדיקה ל-MongoDB בעת עלייה
+  fetch('/api/mongotestest')
+    .then(res => res.json())
+    .then(data => {
+      console.log('תוצאה מהשרת:', data);
+    })
+    .catch(err => console.error('שגיאה בחיבור לשרת:', err));
+
+  // המשך תהליך רגיל של הצגת שאלה ראשונה
+  if (step === 0 && subStep === 0) {
+    setMessages([{ sender: 'bot', text: questions[0] }]);
+    setStep(1);
+  }
+}, []);
 
       return (
         <div>
