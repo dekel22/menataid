@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>בחר דמות</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      color: #d94d72;
+      margin-bottom: 2rem;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 300px;
+      margin: auto;
+    }
+
+    button {
+      padding: 1rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #fce5ec;
+    }
+
+    .prompt-box {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>עם איזה דמות תרצה לדבר?</h1>
+
+  <div class="options">
+    <button onclick="selectCharacter('ילד')">ילד</button>
+    <button onclick="selectCharacter('נער')">נער</button>
+    <button onclick="selectCharacter('מבוגר')">מבוגר</button>
+    <button onclick="selectCharacter('קשיש')">קשיש</button>
+  </div>
+
+  <div id="promptBox" class="prompt-box">
+    <h3>פרומפט התחלתי:</h3>
+    <p id="promptText"></p>
+  </div>
+
+  <script>
+    const prompts = {
+      "ילד": "היי! אני בן 8 ומרגיש קצת מבולבל. תוכל לעזור לי להבין מה אני מרגיש?",
+      "נער": "אני בן 15, מרגיש לחוץ לקראת מבחנים ושינויים. איך מתמודדים עם זה?",
+      "מבוגר": "אני באמצע החיים, לפעמים מרגיש עומס רגשי. רוצה לשתף מישהו.",
+      "קשיש": "אני בן 75, לעיתים מרגיש לבד. אשמח לשיחה שתאיר לי את היום."
+    };
+
+    function selectCharacter(role) {
+      alert("בחרת לדבר עם " + role + "!");
+      const prompt = prompts[role];
+      document.getElementById("promptText").textContent = prompt;
+      document.getElementById("promptBox").style.display = "block";
+    }
+  </script>
+
+</body>
+</html>
