@@ -14,7 +14,6 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error("MongoDB error:", err);
     res.status(500).json({ error: err.message, stack: err.stack });
-  }
   } finally {
     await client.close();
   }
