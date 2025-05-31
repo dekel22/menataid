@@ -12,8 +12,9 @@ export default async function handler(req, res) {
     await collection.insertOne({ name: "test", time: new Date() });
     res.status(200).json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Something went wrong" });
+    console.error("MongoDB error:", err);
+    res.status(500).json({ error: err.message, stack: err.stack });
+  }
   } finally {
     await client.close();
   }
