@@ -158,17 +158,21 @@
       return data.text;
     };
 
-    async function fetchOpeningMessage(prompt) {
+     async function fetchOpeningMessage(prompt) {
       const roleInstruction = prompt + "\nכתוב משפט פתיחה כאילו אתה הדמות, ואתה פונה לאדם שיכול לעזור לך.";
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: roleInstruction, userText: '' })
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: roleInstruction },
+            { role: "user", content: "" }
+          ]
+        })
       });
       const data = await res.json();
       return data.text;
     }
-
     function appendMessage(sender, text) {
       const chatBox = document.getElementById("chatBox");
       const msg = document.createElement("div");
