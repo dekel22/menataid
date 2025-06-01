@@ -158,12 +158,12 @@
       return data.text;
     };
 
-    async function fetchSituation(prompt) {
-      const situationPrompt = prompt + "\nתן לי סיטואציה קצרה שמתארת מצב נפשי לדמות הזו. משפט אחד בלבד.";
+    async function fetchOpeningMessage(prompt) {
+      const roleInstruction = prompt + "כתוב משפט פתיחה מתוך נקודת המבט של הדמות, כאילו היא פונה למטפל שיכול להקשיב ולעזור.";
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: situationPrompt, userText: '' })
+        body: JSON.stringify({ prompt: roleInstruction, userText: '' })
       });
       const data = await res.json();
       return data.text;
@@ -180,21 +180,19 @@
     }
 
     async function selectCharacter(role) {
-      currentPrompt = prompts[role];
-      document.getElementById("characterOptions").style.display = "none";
-      document.getElementById("chatInputArea").style.display = "block";
-    
-      // מציג את התשובה לשאלה האמריקאית מיד מתחת לכותרת הראשית
-      const selectedRole = document.getElementById("selectedRole");
-      selectedRole.innerText = `בחרת: ${role}`;
-      selectedRole.style.display = "block";
-    
-      // מביא סיטואציה לדמות
-      const situation = await fetchSituation(currentPrompt);
-      const titleEl = document.getElementById("situationTitle");
-      titleEl.innerText = situation;
-      titleEl.style.display = "block";
-    }
+        currentPrompt = prompts[role];
+        document.getElementById("characterOptions").style.display = "none";
+        document.getElementById("chatInputArea").style.display = "block";
+      
+        // מציג תשובה לשאלה האמריקאית (מתחת לכותרת הראשית)
+        const selectedRole = document.getElementById("selectedRole");
+        selectedRole.innerText = `בחרת: ${role}`;
+        selectedRole.style.display = "block";
+      
+        // מבקש מהבוט לפתוח את השיחה בתור הדמות
+        const opening = await fetchOpeningMessage(currentPrompt);
+        appendMessage("bot", opening);
+  }
 
 
     function sendMessage() {
