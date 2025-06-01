@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>שיחה לפי דמות</title>
+  <title>סימולציית שיחה</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -18,12 +18,12 @@
       text-align: center;
     }
 
-    h3#situationTitle {
+    #selectedRole {
       display: none;
-      color: #444;
       text-align: center;
-      margin: 1rem 0;
-      font-style: italic;
+      color: #555;
+      font-weight: bold;
+      margin-bottom: 1rem;
     }
 
     .options {
@@ -106,15 +106,14 @@
 <body>
 
   <h1>עם איזה דמות תרצה לדבר?</h1>
-   <p id="selectedRole" style="display: none; text-align: center; color: #555; font-weight: bold; margin-top: -1rem;"></p>
+  <p id="selectedRole"></p>
+
   <div class="options" id="characterOptions">
     <button onclick="selectCharacter('ילד')">ילד</button>
     <button onclick="selectCharacter('נער')">נער</button>
     <button onclick="selectCharacter('מבוגר')">מבוגר</button>
     <button onclick="selectCharacter('קשיש')">קשיש</button>
   </div>
-
-  <h3 id="situationTitle"></h3>
 
   <div id="chatBox"></div>
 
@@ -140,26 +139,27 @@
 
   <script>
     const prompts = {
-      "ילד": "תענה לי בתור ילד בן 12 מופנם במשבר נפשי קשה שאני אבא שלו.",
-      "נער": "תענה לי כנער מתבגר במשבר נפשי שאני החבר הכי טוב שלו.",
-      "מבוגר": "תענה לי כמבוגר במשבר נפשי קשה עם מחשבות אובדניות.",
-      "קשיש": "תענה לי כקשיש בודד בן 80 שמדבר עם בן משפחה שדואג לו."
+      "ילד": "אתה ילד בן 12 מופנם, מתמודד עם מצוקה רגשית קשה. אתה מדבר עם מבוגר שמנסה להקשיב ולעזור.",
+      "נער": "אתה נער מתבגר במשבר, עם תחושות בלבול ובדידות. אתה פונה לחבר הכי טוב שלך.",
+      "מבוגר": "אתה אדם באמצע החיים, מרגיש עומס רגשי וחוסר אונים. אתה מדבר עם איש מקצוע שמנסה לעזור.",
+      "קשיש": "אתה בן 80, מרגיש בדידות עמוקה. אתה משתף את אחד הנכדים שלך בתחושות שלך."
     };
 
     let currentPrompt = '';
+    let messages = [];
 
-    const sendToOpenAI = async (prompt, userText) => {
+    const sendToOpenAI = async (messages) => {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, userText })
+        body: JSON.stringify({ messages })
       });
       const data = await res.json();
       return data.text;
     };
 
     async function fetchOpeningMessage(prompt) {
-      const roleInstruction = prompt + "כתוב משפט פתיחה מתוך נקודת המבט של הדמות, כאילו היא פונה למטפל שיכול להקשיב ולעזור.";
+      const roleInstruction = prompt + "\nכתוב משפט פתיחה כאילו אתה הדמות, ואתה פונה לאדם שיכול לעזור לך.";
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -180,30 +180,36 @@
     }
 
     async function selectCharacter(role) {
-        currentPrompt = prompts[role];
-        document.getElementById("characterOptions").style.display = "none";
-        document.getElementById("chatInputArea").style.display = "block";
-      
-        // מציג תשובה לשאלה האמריקאית (מתחת לכותרת הראשית)
-        const selectedRole = document.getElementById("selectedRole");
-        selectedRole.innerText = `בחרת: ${role}`;
-        selectedRole.style.display = "block";
-      
-        // מבקש מהבוט לפתוח את השיחה בתור הדמות
-        const opening = await fetchOpeningMessage(currentPrompt);
-        appendMessage("bot", opening);
-  }
+      const prompt = prompts[role];
+      currentPrompt = prompt;
+      document.getElementById("characterOptions").style.display = "none";
+      document.getElementById("chatInputArea").style.display = "block";
 
+      document.getElementById("selectedRole").innerText = `בחרת: ${role}`;
+      document.getElementById("selectedRole").style.display = "block";
+
+      const opening = await fetchOpeningMessage(currentPrompt);
+      appendMessage("bot", opening);
+
+      messages = [
+        { role: "system", content: currentPrompt },
+        { role: "assistant", content: opening }
+      ];
+    }
 
     function sendMessage() {
       const input = document.getElementById("userInput");
       const text = input.value.trim();
       if (!text) return;
+
       appendMessage("user", text);
       input.value = "";
 
-      sendToOpenAI(currentPrompt, text).then(response => {
+      messages.push({ role: "user", content: text });
+
+      sendToOpenAI(messages).then(response => {
         appendMessage("bot", response);
+        messages.push({ role: "assistant", content: response });
       });
     }
 
