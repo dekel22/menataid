@@ -106,7 +106,7 @@
 <body>
 
   <h1>עם איזה דמות תרצה לדבר?</h1>
-
+   <p id="selectedRole" style="display: none; text-align: center; color: #555; font-weight: bold; margin-top: -1rem;"></p>
   <div class="options" id="characterOptions">
     <button onclick="selectCharacter('ילד')">ילד</button>
     <button onclick="selectCharacter('נער')">נער</button>
@@ -183,12 +183,19 @@
       currentPrompt = prompts[role];
       document.getElementById("characterOptions").style.display = "none";
       document.getElementById("chatInputArea").style.display = "block";
-
+    
+      // מציג את התשובה לשאלה האמריקאית מיד מתחת לכותרת הראשית
+      const selectedRole = document.getElementById("selectedRole");
+      selectedRole.innerText = `בחרת: ${role}`;
+      selectedRole.style.display = "block";
+    
+      // מביא סיטואציה לדמות
       const situation = await fetchSituation(currentPrompt);
       const titleEl = document.getElementById("situationTitle");
       titleEl.innerText = situation;
       titleEl.style.display = "block";
     }
+
 
     function sendMessage() {
       const input = document.getElementById("userInput");
