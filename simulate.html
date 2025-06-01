@@ -116,10 +116,10 @@
 
   <script>
     const prompts = {
-      "ילד": "היי! אני בן 8 ומרגיש קצת מבולבל. תוכל לעזור לי להבין מה אני מרגיש?",
-      "נער": "אני בן 15, מרגיש לחוץ לקראת מבחנים ושינויים. איך מתמודדים עם זה?",
-      "מבוגר": "אני באמצע החיים, לפעמים מרגיש עומס רגשי. רוצה לשתף מישהו.",
-      "קשיש": "אני בן 75, לעיתים מרגיש לבד. אשמח לשיחה שתאיר לי את היום."
+      "תענה לי בתור ילד בן 12  מופנם במשבר נפשי קשה שאני אבא שלו",
+      "תענה לי כנער מתבגר במשבר נפשי שאני החבר הכי טוב שלו",
+      "תענה לי כמובגר במשבר נפשי קשה עם מחשבות  אובדניות",
+
     };
 
     let currentPrompt = '';
@@ -144,14 +144,12 @@
     }
 
     function selectCharacter(role) {
-      const prompt = prompts[role];
-      currentPrompt = prompt;
-      document.getElementById("characterOptions").style.display = "none";
-      document.getElementById("chat").style.display = "block";
-      appendMessage("user", prompt);
-      sendToOpenAI(currentPrompt, "").then(response => {
-        appendMessage("bot", response);
-      });
+  const prompt = prompts[role];
+  currentPrompt = prompt;
+  document.getElementById("characterOptions").style.display = "none";
+  document.getElementById("chat").style.display = "block";
+  // בלי לשלוח או להציג כלום כאן – רק שמור את הפרומפט
+  }
     }
 
     function sendMessage() {
@@ -162,7 +160,8 @@
       input.value = "";
 
       sendToOpenAI(currentPrompt, text).then(response => {
-        appendMessage("bot", response);
+      appendMessage("bot", response);
+});
       });
     }
   </script>
