@@ -116,10 +116,10 @@
 
   <script>
     const prompts = {
-      "תענה לי בתור ילד בן 12  מופנם במשבר נפשי קשה שאני אבא שלו",
-      "תענה לי כנער מתבגר במשבר נפשי שאני החבר הכי טוב שלו",
-      "תענה לי כמובגר במשבר נפשי קשה עם מחשבות  אובדניות",
-
+      "ילד": "תענה לי בתור ילד בן 12 מופנם במשבר נפשי קשה שאני אבא שלו.",
+      "נער": "תענה לי כנער מתבגר במשבר נפשי שאני החבר הכי טוב שלו.",
+      "מבוגר": "תענה לי כמבוגר במשבר נפשי קשה עם מחשבות אובדניות.",
+      "קשיש": "תענה לי כקשיש בודד בן 80 שמדבר עם בן משפחה שדואג לו."
     };
 
     let currentPrompt = '';
@@ -144,12 +144,11 @@
     }
 
     function selectCharacter(role) {
-  const prompt = prompts[role];
-  currentPrompt = prompt;
-  document.getElementById("characterOptions").style.display = "none";
-  document.getElementById("chat").style.display = "block";
-  // בלי לשלוח או להציג כלום כאן – רק שמור את הפרומפט
-  }
+      const prompt = prompts[role];
+      currentPrompt = prompt;
+      document.getElementById("characterOptions").style.display = "none";
+      document.getElementById("chat").style.display = "block";
+      // לא מציגים את הפרומפט, רק שומרים אותו
     }
 
     function sendMessage() {
@@ -160,8 +159,7 @@
       input.value = "";
 
       sendToOpenAI(currentPrompt, text).then(response => {
-      appendMessage("bot", response);
-});
+        appendMessage("bot", response);
       });
     }
   </script>
