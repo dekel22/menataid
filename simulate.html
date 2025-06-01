@@ -220,6 +220,14 @@
     function goHome() {
       window.location.href = "index.html";
     }
+
+    document.getElementById("userInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault(); // לא ירד שורה
+          sendMessage();
+      }
+    });
+    
   </script>
 
 </body>
