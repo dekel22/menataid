@@ -18,6 +18,14 @@
       text-align: center;
     }
 
+    h3#situationTitle {
+      display: none;
+      color: #444;
+      text-align: center;
+      margin: 1rem 0;
+      font-style: italic;
+    }
+
     .options {
       display: flex;
       flex-direction: column;
@@ -106,10 +114,10 @@
     <button onclick="selectCharacter('קשיש')">קשיש</button>
   </div>
 
-  <!-- תיבת הצ'אט (ריקה בהתחלה) -->
+  <h3 id="situationTitle"></h3>
+
   <div id="chatBox"></div>
 
-  <!-- תיבת ההקלדה -->
   <div id="chatInputArea">
     <div id="inputBox">
       <input type="text" id="userInput" placeholder="כתוב הודעה..." />
@@ -117,7 +125,6 @@
     </div>
   </div>
 
-  <!-- כפתור חזרה -->
   <div style="text-align: center; margin-top: 2rem;">
     <button onclick="goHome()" style="
       background-color: #ccc;
@@ -151,20 +158,36 @@
       return data.text;
     };
 
+    async function fetchSituation(prompt) {
+      const situationPrompt = prompt + "\nתן לי סיטואציה קצרה שמתארת מצב נפשי לדמות הזו. משפט אחד בלבד.";
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: situationPrompt, userText: '' })
+      });
+      const data = await res.json();
+      return data.text;
+    }
+
     function appendMessage(sender, text) {
       const chatBox = document.getElementById("chatBox");
       const msg = document.createElement("div");
       msg.className = "message " + sender;
       msg.innerText = text;
       chatBox.appendChild(msg);
-      chatBox.style.display = "block"; // מציג את הצ'אט רק לאחר הודעה
+      chatBox.style.display = "block";
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function selectCharacter(role) {
+    async function selectCharacter(role) {
       currentPrompt = prompts[role];
       document.getElementById("characterOptions").style.display = "none";
       document.getElementById("chatInputArea").style.display = "block";
+
+      const situation = await fetchSituation(currentPrompt);
+      const titleEl = document.getElementById("situationTitle");
+      titleEl.innerText = situation;
+      titleEl.style.display = "block";
     }
 
     function sendMessage() {
