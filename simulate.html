@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>שיחה לפי דמות</title>
   <style>
     body {
@@ -40,19 +40,19 @@
       background-color: #ffe5ec;
     }
 
-    #chat {
+    #chatInputArea {
       display: none;
-      border-top: 2px solid #ddd;
-      padding-top: 1rem;
+      margin-top: 1rem;
     }
 
-    .chat-box {
+    #chatBox {
       background-color: white;
       padding: 1rem;
       border-radius: 10px;
       max-height: 300px;
       overflow-y: auto;
       margin-bottom: 1rem;
+      display: none;
     }
 
     .message {
@@ -106,12 +106,29 @@
     <button onclick="selectCharacter('קשיש')">קשיש</button>
   </div>
 
-  <div id="chat">
-    <div class="chat-box" id="chatBox"></div>
+  <!-- תיבת הצ'אט (ריקה בהתחלה) -->
+  <div id="chatBox"></div>
+
+  <!-- תיבת ההקלדה -->
+  <div id="chatInputArea">
     <div id="inputBox">
-      <input type="text" id="userInput" placeholder="כתוב הודעה...">
+      <input type="text" id="userInput" placeholder="כתוב הודעה..." />
       <button id="sendBtn" onclick="sendMessage()">שלח</button>
     </div>
+  </div>
+
+  <!-- כפתור חזרה -->
+  <div style="text-align: center; margin-top: 2rem;">
+    <button onclick="goHome()" style="
+      background-color: #ccc;
+      color: #333;
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem 1.5rem;
+      cursor: pointer;
+    ">
+      חזרה למסך הראשי
+    </button>
   </div>
 
   <script>
@@ -140,15 +157,14 @@
       msg.className = "message " + sender;
       msg.innerText = text;
       chatBox.appendChild(msg);
+      chatBox.style.display = "block"; // מציג את הצ'אט רק לאחר הודעה
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     function selectCharacter(role) {
-      const prompt = prompts[role];
-      currentPrompt = prompt;
+      currentPrompt = prompts[role];
       document.getElementById("characterOptions").style.display = "none";
-      document.getElementById("chat").style.display = "block";
-      // לא מציגים את הפרומפט, רק שומרים אותו
+      document.getElementById("chatInputArea").style.display = "block";
     }
 
     function sendMessage() {
@@ -161,6 +177,10 @@
       sendToOpenAI(currentPrompt, text).then(response => {
         appendMessage("bot", response);
       });
+    }
+
+    function goHome() {
+      window.location.href = "index.html";
     }
   </script>
 
