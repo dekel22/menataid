@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages } = req.body;
+    const { prompt, userText } = req.body;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -13,8 +13,11 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.OPENAI_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o', // או gpt-3.5-turbo אם אתה לא מנוי
-        messages,
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: prompt },
+          { role: 'user', content: userText }
+        ],
         temperature: 0.7
       })
     });
