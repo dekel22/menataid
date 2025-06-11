@@ -148,12 +148,19 @@
     let currentPrompt = '';
     let messages = [];
 
-  const sendToOpenAI = async (messages) => {
+    const sendToOpenAI = async (messages) => {
+      const systemMessage = messages.find(msg => msg.role === "system")?.content || "";
+      const lastUserMessage = [...messages].reverse().find(msg => msg.role === "user")?.content || "";
+    
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages })
+        body: JSON.stringify({
+          prompt: systemMessage,
+          userText: lastUserMessage
+        })
       });
+    
       const data = await res.json();
       return data.text;
     };
