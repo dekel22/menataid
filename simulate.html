@@ -136,6 +136,27 @@
       חזרה למסך הראשי
     </button>
   </div>
+<!-- כפתור התקשר לערן -->
+<button id="callEran" onclick="location.href='tel:+972501234567'">
+  התקשר לערן
+</button>
+
+<style>
+  /* כפתור קבוע בפינה */
+  #callEran{
+    position: fixed;   /* מיקום קבוע על המסך */
+    bottom: 20px;      /* 20px מהתחתית */
+    left: 20px;        /* 20px מהצד השמאלי; שנה ל-right אם צריך */
+    background:#28a745;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    padding:0.7rem 1.5rem;
+    cursor:pointer;
+    box-shadow:0 2px 5px rgba(0,0,0,.25);
+  }
+  #callEran:hover{ background:#218838; }
+</style>
 
   <script>
     /* ---------- הגדרות דמויות ---------- */
