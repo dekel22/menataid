@@ -138,48 +138,46 @@
   </div>
 
   <script>
+    /* ---------- הגדרות דמויות ---------- */
     const prompts = {
-      "ילד": "אתה ילד בן 12 מופנם, מתמודד עם מצוקה רגשית קשה. אתה מדבר עם מבוגר שמנסה להקשיב ולעזור.",
-      "נער": "אתה נער מתבגר במשבר, עם תחושות בלבול ובדידות. אתה פונה לחבר הכי טוב שלך.",
+      "ילד":   "אתה ילד בן 12 מופנם, מתמודד עם מצוקה רגשית קשה. אתה מדבר עם מבוגר שמנסה להקשיב ולעזור.",
+      "נער":   "אתה נער מתבגר במשבר, עם תחושות בלבול ובדידות. אתה פונה לחבר הכי טוב שלך.",
       "מבוגר": "אתה אדם באמצע החיים, מרגיש עומס רגשי וחוסר אונים. אתה מדבר עם איש מקצוע שמנסה לעזור.",
-      "קשיש": "אתה בן 80, מרגיש בדידות עמוקה. אתה משתף את אחד הנכדים שלך בתחושות שלך."
+      "קשיש":  "אתה בן 80, מרגיש בדידות עמוקה. אתה משתף את אחד הנכדים שלך בתחושות שלך."
     };
 
     let currentPrompt = '';
     let messages = [];
 
-    const sendToOpenAI = async (messages) => {
-      const systemMessage = messages.find(msg => msg.role === "system")?.content || "";
-      const lastUserMessage = [...messages].reverse().find(msg => msg.role === "user")?.content || "";
-    
+    /* ---------- קריאה ל־OpenAI ---------- */
+    async function sendToOpenAI(messagesArray) {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: messagesArray })
+      });
+      const data = await res.json();
+      return data.text ?? 'אין תגובה';
+    }
+
+    async function fetchOpeningMessage(prompt) {
+      const roleInstruction =
+        prompt + "\nכתוב משפט פתיחה כאילו אתה הדמות, ואתה פונה לאדם שיכול לעזור לך.";
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: systemMessage,
-          userText: lastUserMessage
+          messages: [
+            { role: "system", content: roleInstruction },
+            { role: "user", content: "" }
+          ]
         })
       });
-    
       const data = await res.json();
-      return data.text;
-    };
-
-    async function fetchOpeningMessage(prompt) {
-        const roleInstruction = prompt + "\nכתוב משפט פתיחה כאילו אתה הדמות, ואתה פונה לאדם שיכול לעזור לך.";
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [
-              { role: "system", content: roleInstruction },
-              { role: "user", content: "" }
-            ]
-          })
-        });
-        const data = await res.json();
-        return data.text;
+      return data.text ?? 'אין תגובה';
     }
+
+    /* ---------- תצוגת צ'אט ---------- */
     function appendMessage(sender, text) {
       const chatBox = document.getElementById("chatBox");
       const msg = document.createElement("div");
@@ -190,12 +188,12 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    /* ---------- בחירת דמות ---------- */
     async function selectCharacter(role) {
-      const prompt = prompts[role];
-      currentPrompt = prompt;
+      currentPrompt = prompts[role];
+
       document.getElementById("characterOptions").style.display = "none";
       document.getElementById("chatInputArea").style.display = "block";
-
       document.getElementById("selectedRole").innerText = `בחרת: ${role}`;
       document.getElementById("selectedRole").style.display = "block";
 
@@ -206,8 +204,10 @@
         { role: "system", content: currentPrompt },
         { role: "assistant", content: opening }
       ];
+      document.getElementById("userInput").focus();
     }
 
+    /* ---------- שליחת הודעה ---------- */
     function sendMessage() {
       const input = document.getElementById("userInput");
       const text = input.value.trim();
@@ -224,17 +224,18 @@
       });
     }
 
+    /* ---------- חזרה למסך הראשי ---------- */
     function goHome() {
       window.location.href = "index.html";
     }
 
+    /* ---------- אנטר לשליחה ---------- */
     document.getElementById("userInput").addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault(); // לא ירד שורה
-          sendMessage();
+        e.preventDefault(); // מניעת ירידת שורה
+        sendMessage();
       }
     });
-    
   </script>
 
 </body>
