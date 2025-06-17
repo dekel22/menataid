@@ -179,7 +179,13 @@
     };
 
     // Evaluation prompt
-    const evaluationPrompt = 'את/ה פסיכולוג/ית קליני/ת. הערך/י את התמיכה שהמשתמש סיפק, בפידבק חיובי ואז הצעת שיפור.';
+    const evaluationPrompt = `את/ה פסיכולוג/ית קליני/ת. הערך/י את התמיכה שהמשתמש (role: user) נתן/ה לאורך כל השיחה, **בדיוק** במבנה של הדוגמאות המצורפות ("דוגמא 1–3"):
+
+- פתח/י בכותרת מודגשת "משוב מסכם:".
+- הוסף/י כותרת משנה "מה נעשה נכון:" ולאחריה רשימה תבליטים (•) של 3‑6 נקודות חיוביות.
+- הוסף/י כותרת משנה "מה אפשר לשפר:" ולאחריה רשימת תבליטים (•) של 2‑4 הצעות שיפור קונקרטיות ועדינות.
+
+שמור/י על הטון האמפתי והמעודד של הדוגמאות, איזון בין חיזוק לחבר/ה ותוכן מקצועי. אל תחרוג/י מהמבנה.`;
 
     // === Conversation state ===
     let messages = [];
@@ -228,9 +234,14 @@
       fetchChat([{ role: 'system', content: scenarioSystemPrompt }, ...messages], 'bot');
     }
 
-    function handleEvaluate() {
+            function handleEvaluate() {
+      // שלח את כל השיחה (משתמש + חבר) כדי לא לאבד הקשר,
+      // אך ההנחיה מבהירה למודל להתמקד בהודעות המשתמש בלבד.
       if (messages.length === 0) return;
-      fetchChat([{ role: 'system', content: evaluationPrompt }, ...messages], 'evaluation');
+      fetchChat([
+        { role: 'system', content: evaluationPrompt },
+        ...messages
+      ], 'evaluation');
     }
 
     async function fetchChat(bodyMessages, roleForBubble) {
