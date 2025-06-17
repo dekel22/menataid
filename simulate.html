@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>סימולציית שיחה</title>
+  <title>סימולציית מצוקה</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,74 +17,79 @@
       color: #d94d72;
       text-align: center;
     }
-    /* כפתור התקשרות קבוע בעיצוב זהה */
-  .eren-call{
-    display:inline-block;
-    margin-top:1.5rem;           /* רווח מעל הכפתור */
-    padding:1rem;
-    font-size:1rem;
-    border:none;
-    border-radius:8px;
-    background-color:#d94d72;    /* אותו ורוד של הכפתורים האחרים */
-    color:#fff;
-    text-align:center;
-    text-decoration:none;        /* שלא ייראה כמו קישור */
-    box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    cursor:pointer;
-    transition:background-color .3s;
-  }
-  .eren-call:hover{
-    background-color:#c03d60;    /* צבע ה-hover הזהה */
-  }
 
-
-    #selectedRole {
-      display: none;
-      text-align: center;
-      color: #555;
-      font-weight: bold;
-      margin-bottom: 1rem;
-    }
-
-    .options {
+    /* Scenario selector */
+    #scenarioContainer {
       display: flex;
       flex-direction: column;
       gap: 1rem;
       margin-bottom: 2rem;
     }
 
-    button {
-      padding: 1rem;
+    select {
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+    }
+
+    /* Instructions area (shown after scenario chosen) */
+    #instructionContainer {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    #instructionInput {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+
+    #startBtn {
+      align-self: flex-start;
+      padding: 0.75rem 1rem;
       font-size: 1rem;
       border: none;
       border-radius: 8px;
-      background-color: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background-color: #d94d72;
+      color: #fff;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
 
-    button:hover {
-      background-color: #ffe5ec;
+    /* Chat area */
+    #chatContainer {
+      display: none; /* Hidden until simulation starts */
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    #chatInputArea {
-      display: none;
-      margin-top: 1rem;
-    }
-
-    #chatBox {
-      background-color: white;
+    #instructionsDiv {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
       padding: 1rem;
-      border-radius: 10px;
-      max-height: 300px;
+      color: #444;
+      margin-bottom: 0.5rem;
+      white-space: pre-wrap;
+    }
+
+    #chat {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      min-height: 300px;
       overflow-y: auto;
-      margin-bottom: 1rem;
-      display: none;
     }
 
     .message {
-      margin-bottom: 1rem;
+      margin: 0.5rem 0;
     }
 
     .user {
@@ -94,188 +99,156 @@
 
     .bot {
       text-align: left;
-      color: #d94d72;
+      color: #555;
     }
 
-    #inputBox {
+    #inputContainer {
       display: flex;
       gap: 0.5rem;
+      margin-top: 1rem;
     }
 
-    input {
+    #userInput {
       flex: 1;
-      padding: 0.8rem;
-      border-radius: 6px;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 8px;
       border: 1px solid #ccc;
     }
 
     #sendBtn {
-      background-color: #d94d72;
-      color: white;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
       border: none;
-      border-radius: 6px;
-      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      background-color: #d94d72;
+      color: #fff;
       cursor: pointer;
-    }
-
-    #sendBtn:hover {
-      background-color: #c03d60;
     }
   </style>
 </head>
 <body>
+  <h1>סימולציית מצוקה</h1>
 
-  <h1>עם איזה דמות תרצה לדבר?</h1>
-  <p id="selectedRole"></p>
-
-  <div class="options" id="characterOptions">
-    <button onclick="selectCharacter('ילד')">ילד</button>
-    <button onclick="selectCharacter('נער')">נער</button>
-    <button onclick="selectCharacter('מבוגר')">מבוגר</button>
-    <button onclick="selectCharacter('קשיש')">קשיש</button>
+  <!-- Scenario selection -->
+  <div id="scenarioContainer">
+    <label for="scenarioSelect">בחר/י משפט פתיחה:</label>
+    <select id="scenarioSelect">
+      <option value="" selected disabled>-- בחר/י --</option>
+      <option value="worthless">"אני לא שווה כלום"</option>
+      <option value="choking">"הכול חונק אותי"</option>
+      <option value="loneliness">"בדידות"</option>
+    </select>
   </div>
 
-  <div id="chatBox"></div>
+  <!-- Instructions input (facilitator writes guidance) -->
+  <div id="instructionContainer">
+    <label for="instructionInput">כתוב/י הדרכות למשתמש לפני תחילת הסימולציה:</label>
+    <textarea id="instructionInput" rows="4" placeholder="למשל: \n- קרא בקול רם את המשפט שבחרת.\n- נסה לתאר במילים שלך מה אתה מרגיש." ></textarea>
+    <button id="startBtn">התחל סימולציה</button>
+  </div>
 
-  <div id="chatInputArea">
-    <div id="inputBox">
-      <input type="text" id="userInput" placeholder="כתוב הודעה..." />
-      <button id="sendBtn" onclick="sendMessage()">שלח</button>
+  <!-- Chat area -->
+  <div id="chatContainer">
+    <div id="instructionsDiv"></div>
+    <div id="chat"></div>
+
+    <div id="inputContainer">
+      <input id="userInput" type="text" placeholder="הקלד/י הודעה..." />
+      <button id="sendBtn">שלח</button>
     </div>
   </div>
 
-  <div style="text-align: center; margin-top: 2rem;">
-    <button onclick="goHome()" style="
-      background-color: #ccc;
-      color: #333;
-      border: none;
-      border-radius: 6px;
-      padding: 0.7rem 1.5rem;
-      cursor: pointer;
-    ">
-      חזרה למסך הראשי
-    </button>
-  </div>
-<!-- כפתור התקשר לערן -->
-<a href="tel:1201" class="eren-call">דבר עם ער"ן ‎1201</a>
-
-<style>
-  /* כפתור קבוע בפינה */
-  #callEran{
-    position: fixed;   /* מיקום קבוע על המסך */
-    bottom: 20px;      /* 20px מהתחתית */
-    left: 20px;        /* 20px מהצד השמאלי; שנה ל-right אם צריך */
-    background:#28a745;
-    color:#fff;
-    border:none;
-    border-radius:6px;
-    padding:0.7rem 1.5rem;
-    cursor:pointer;
-    box-shadow:0 2px 5px rgba(0,0,0,.25);
-  }
-  #callEran:hover{ background:#218838; }
-</style>
-
   <script>
-    /* ---------- הגדרות דמויות ---------- */
-    const prompts = {
-      "ילד":   "אתה ילד בן 12 מופנם, מתמודד עם מצוקה רגשית קשה. אתה מדבר עם מבוגר שמנסה להקשיב ולעזור.",
-      "נער":   "אתה נער מתבגר במשבר, עם תחושות בלבול ובדידות. אתה פונה לחבר הכי טוב שלך.",
-      "מבוגר": "אתה אדם באמצע החיים, מרגיש עומס רגשי וחוסר אונים. אתה מדבר עם איש מקצוע שמנסה לעזור.",
-      "קשיש":  "אתה בן 80, מרגיש בדידות עמוקה. אתה משתף את אחד הנכדים שלך בתחושות שלך."
+    const scenarioSelect = document.getElementById('scenarioSelect');
+    const scenarioContainer = document.getElementById('scenarioContainer');
+    const instructionContainer = document.getElementById('instructionContainer');
+    const instructionInput = document.getElementById('instructionInput');
+    const startBtn = document.getElementById('startBtn');
+    const chatContainer = document.getElementById('chatContainer');
+    const instructionsDiv = document.getElementById('instructionsDiv');
+    const chat = document.getElementById('chat');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Prompts for each scenario
+    const scenarioPrompts = {
+      worthless: 'אתה מתנדב במוקד "ער"ן" ומקבל שיחה מפונה שאומר/ת "אני לא שווה כלום". דבר/י בקול אמפתי, שאל/י שאלות פתוחות, הדגש/י קבלה ותקווה. המשתמש הוא הפונה והוא יתחיל את השיחה.',
+      choking: 'אתה מתנדב במוקד "ער"ן" ומקבל שיחה מפונה שאומר/ת "הכול חונק אותי" וחווה לחץ גדול. שמור/י על קול רגוע, ערוך/י בירור לגבי תחושות גופניות והצע/י טכניקת נשימה בסיסית. המשתמש הוא הפונה והוא יתחיל את השיחה.',
+      loneliness: 'אתה מתנדב במוקד "ער"ן" ומקבל שיחה מפונה שמרגיש/ה "בדידות" עמוקה. האזן/י בקשב, שאל/י שאלות שמעודדות שיתוף והביע/י אמפתיה. המשתמש הוא הפונה והוא יתחיל את השיחה.'
     };
 
-    let currentPrompt = '';
+    // Conversation state
     let messages = [];
+    let scenarioPrompt = '';
 
-    /* ---------- קריאה ל־OpenAI ---------- */
-    async function sendToOpenAI(messagesArray) {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: messagesArray })
-      });
-      const data = await res.json();
-      return data.text ?? 'אין תגובה';
+    scenarioSelect.addEventListener('change', () => {
+      if (!scenarioSelect.value) return;
+      scenarioPrompt = scenarioPrompts[scenarioSelect.value];
+
+      // Move to instruction step
+      scenarioContainer.style.display = 'none';
+      instructionContainer.style.display = 'flex';
+      instructionInput.focus();
+    });
+
+    startBtn.addEventListener('click', () => {
+      const instructionsText = instructionInput.value.trim();
+      instructionContainer.style.display = 'none';
+      chatContainer.style.display = 'flex';
+
+      if (instructionsText) {
+        instructionsDiv.textContent = instructionsText;
+      }
+
+      userInput.focus();
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    function appendMessage(role, text) {
+      const div = document.createElement('div');
+      div.className = `message ${role}`;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
     }
 
-    async function fetchOpeningMessage(prompt) {
-      const roleInstruction =
-        prompt + "\nכתוב משפט פתיחה כאילו אתה הדמות, ואתה פונה לאדם שיכול לעזור לך.";
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            { role: "system", content: roleInstruction },
-            { role: "user", content: "" }
-          ]
-        })
-      });
-      const data = await res.json();
-      return data.text ?? 'אין תגובה';
-    }
-
-    /* ---------- תצוגת צ'אט ---------- */
-    function appendMessage(sender, text) {
-      const chatBox = document.getElementById("chatBox");
-      const msg = document.createElement("div");
-      msg.className = "message " + sender;
-      msg.innerText = text;
-      chatBox.appendChild(msg);
-      chatBox.style.display = "block";
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    /* ---------- בחירת דמות ---------- */
-    async function selectCharacter(role) {
-      currentPrompt = prompts[role];
-
-      document.getElementById("characterOptions").style.display = "none";
-      document.getElementById("chatInputArea").style.display = "block";
-      document.getElementById("selectedRole").innerText = `בחרת: ${role}`;
-      document.getElementById("selectedRole").style.display = "block";
-
-      const opening = await fetchOpeningMessage(currentPrompt);
-      appendMessage("bot", opening);
-
-      messages = [
-        { role: "system", content: currentPrompt },
-        { role: "assistant", content: opening }
-      ];
-      document.getElementById("userInput").focus();
-    }
-
-    /* ---------- שליחת הודעה ---------- */
-    function sendMessage() {
-      const input = document.getElementById("userInput");
-      const text = input.value.trim();
+    async function sendMessage() {
+      const text = userInput.value.trim();
       if (!text) return;
 
-      appendMessage("user", text);
-      input.value = "";
+      // Add user message to UI and to messages array
+      appendMessage('user', text);
+      messages.push({ role: 'user', content: text });
+      userInput.value = '';
 
-      messages.push({ role: "user", content: text });
+      try {
+        // Build request body: include system prompt only for first user turn
+        const body = {
+          messages: messages.length === 1 ? [ { role: 'system', content: scenarioPrompt }, ...messages ] : messages
+        };
 
-      sendToOpenAI(messages).then(response => {
-        appendMessage("bot", response);
-        messages.push({ role: "assistant", content: response });
-      });
-    }
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
 
-    /* ---------- חזרה למסך הראשי ---------- */
-    function goHome() {
-      window.location.href = "index.html";
-    }
+        const data = await res.json();
+        const reply = data.text || 'אין תגובה';
 
-    /* ---------- אנטר לשליחה ---------- */
-    document.getElementById("userInput").addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault(); // מניעת ירידת שורה
-        sendMessage();
+        // Add bot message to UI and to messages array
+        appendMessage('bot', reply);
+        messages.push({ role: 'assistant', content: reply });
+      } catch (err) {
+        console.error('Error:', err);
+        appendMessage('bot', 'שגיאה בשליחת הבקשה.');
       }
-    });
+    }
   </script>
-
 </body>
 </html>
