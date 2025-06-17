@@ -78,22 +78,33 @@
       display: flex;
       gap: 0.5rem;
       margin-top: 1rem;
+      flex-wrap: wrap;
     }
 
     #userInput {
-      flex: 1;
+      flex: 1 1 200px;
       padding: 0.75rem;
       font-size: 1rem;
       border-radius: 8px;
       border: 1px solid #ccc;
     }
 
-    #sendBtn {
+    button.primary {
       padding: 0.75rem 1rem;
       font-size: 1rem;
       border: none;
       border-radius: 8px;
       background-color: #d94d72;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #777;
       color: #fff;
       cursor: pointer;
     }
@@ -120,7 +131,8 @@
 
     <div id="inputContainer">
       <input id="userInput" type="text" placeholder="הקלד/י תגובה תומכת..." />
-      <button id="sendBtn">שלח</button>
+      <button id="sendBtn" class="primary">שלח</button>
+      <button id="evaluateBtn" class="secondary">להערכה</button>
     </div>
   </div>
 
@@ -132,6 +144,7 @@
     const chat = document.getElementById('chat');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    const evaluateBtn = document.getElementById('evaluateBtn');
 
     // Detailed scenario text shown to user
     const scenarioDisplayTexts = {
@@ -147,7 +160,10 @@
       loneliness: 'את/ה החבר/ה במצוקה. פתח/י במילה "בדידות" והמשך/י לתאר תחושת ריק, ניכור וחוסר קשר אנושי. הישאר/י בתפקיד הנתמך למשך כל השיחה; אל תנסה/י לעודד את התומך. הבע/י כאב במילים פשוטות, ואל תפסיק/י לבקש הקשבה.'
     };
 
-    // Conversation state (only user & bot messages stored)
+    // Evaluation prompt
+    const evaluationPrompt = 'את/ה פסיכולוג/ית קליני/ת. על סמך ההודעות של המשתמש (role: user) בשיחה הבאה, הערך/י בכנות אך בעדינות עד כמה היה/תה תומך/ת, מכיל/ה ואמפתי/ת. כתוב/י שתי פסקאות: תחילה פידבק חיובי (מה עבד טוב), ולאחר מכן הצעה קונקרטית אחת או שתיים לשיפור. דבר/י בעברית פשוטה וחיובית.';
+
+    // Conversation state
     let messages = [];
     let scenarioPrompt = '';
 
@@ -156,7 +172,6 @@
       const key = scenarioSelect.value;
       scenarioPrompt = scenarioPrompts[key];
 
-      // Show chat area with detailed scenario + action plan
       scenarioContainer.style.display = 'none';
       chatContainer.style.display = 'flex';
 
@@ -170,6 +185,8 @@
       if (e.key === 'Enter') sendUserMessage();
     });
 
+    evaluateBtn.addEventListener('click', evaluateConversation);
+
     function appendMessage(role, text) {
       const div = document.createElement('div');
       div.className = `message ${role}`;
@@ -182,7 +199,6 @@
       const text = userInput.value.trim();
       if (!text) return;
 
-      // Add supporter message
       appendMessage('user', text);
       messages.push({ role: 'user', content: text });
       userInput.value = '';
@@ -191,25 +207,36 @@
     }
 
     async function getBotReply() {
-      try {
-        const body = {
-          messages: [ { role: 'system', content: scenarioPrompt }, ...messages ]
-        };
+      const body = {
+        messages: [{ role: 'system', content: scenarioPrompt }, ...messages]
+      };
+      await callApiAndAppend(body, 'bot');
+    }
 
+    async function evaluateConversation() {
+      if (messages.length === 0) return;
+      const evalBody = {
+        messages: [{ role: 'system', content: evaluationPrompt }, ...messages]
+      };
+      await callApiAndAppend(evalBody, 'bot');
+    }
+
+    async function callApiAndAppend(body, roleToAppend) {
+      try {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
-
         const data = await res.json();
         const reply = data.text || 'אין תגובה';
-
-        appendMessage('bot', reply);
-        messages.push({ role: 'assistant', content: reply });
+        appendMessage(roleToAppend, reply);
+        if (roleToAppend === 'bot') {
+          messages.push({ role: 'assistant', content: reply });
+        }
       } catch (err) {
         console.error('Error:', err);
-        appendMessage('bot', 'שגיאה בשליחת הבקשה.');
+        appendMessage(roleToAppend, 'שגיאה בשליחת הבקשה.');
       }
     }
   </script>
