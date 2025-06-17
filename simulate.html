@@ -119,7 +119,7 @@
     <div id="chat"></div>
 
     <div id="inputContainer">
-      <input id="userInput" type="text" placeholder="הקלד/י הודעה..." />
+      <input id="userInput" type="text" placeholder="הקלד/י הודעה תומכת..." />
       <button id="sendBtn">שלח</button>
     </div>
   </div>
@@ -133,11 +133,18 @@
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    // Prompts for each scenario
+    // Display text for each scenario
+    const scenarioDisplayTexts = {
+      worthless: 'חבר/ה אומר/ת: "אני לא שווה כלום"',
+      choking: 'חבר/ה אומר/ת: "הכול חונק אותי"',
+      loneliness: 'חבר/ה אומר/ת: "בדידות"'
+    };
+
+    // Prompts for assistant to act as friend in distress
     const scenarioPrompts = {
-      worthless: 'אתה מתנדב במוקד "ער"ן" ומקבל שיחה מפונה שאומר/ת "אני לא שווה כלום". דבר/י בקול אמפתי, שאל/י שאלות פתוחות, הדגש/י קבלה ותקווה. המשתמש הוא הפונה והוא יתחיל את השיחה.',
-      choking: 'אתה מתנדב במוקד "ער"ן" ומקבל שיחה מפונה שאומר/ת "הכול חונק אותי" וחווה לחץ גדול. שמור/י על קול רגוע, ערוך/י בירור לגבי תחושות גופניות והצע/י טכניקת נשימה בסיסית. המשתמש הוא הפונה והוא יתחיל את השיחה.',
-      loneliness: 'אתה מתנדב במוקד "ער"ן" ומקבל שיחה מפונה שמרגיש/ה "בדידות" עמוקה. האזן/י בקשב, שאל/י שאלות שמעודדות שיתוף והביע/י אמפתיה. המשתמש הוא הפונה והוא יתחיל את השיחה.'
+      worthless: 'את/ה החבר/ה במצוקה. תפתח/י בדברים כמו "אני לא שווה כלום" ותשתף/י בתחושות חוסר ערך. היה/י כנה ופגיע, תן/י למשתמש (התומך) מקום לעודד. ענה/י בעברית יומיומית.',
+      choking: 'את/ה החבר/ה במצוקה. פתח/י ב"הכול חונק אותי", פרט/י לחץ ומועקה, ושתף/י פחדים. היה/י פתוח/ה לתמיכה. ענה/י בעברית יומיומית.',
+      loneliness: 'את/ה החבר/ה במצוקה. פתח/י במילה "בדידות" ופרט/י תחושת ריק וניכור. היה/י כן ופגיע. ענה/י בעברית יומיומית.'
     };
 
     // Conversation state
@@ -146,13 +153,14 @@
 
     scenarioSelect.addEventListener('change', () => {
       if (!scenarioSelect.value) return;
-      scenarioPrompt = scenarioPrompts[scenarioSelect.value];
+      const key = scenarioSelect.value;
+      scenarioPrompt = scenarioPrompts[key];
 
-      // Show chat area with integrated action plan
+      // Show chat area with scenario + action plan
       scenarioContainer.style.display = 'none';
       chatContainer.style.display = 'flex';
 
-      instructionsDiv.innerHTML = '<strong>שלבי תוכנית הפעולה:</strong><ol><li>זיהוי סימני אזהרה</li><li>שאלי לשלומה</li><li>הקשבה לא שיפוטית</li><li>עזרי לה להתחבר לדמות מבוגרת אחראית</li><li>הדגישי את חשיבות החברות</li></ol>';
+      instructionsDiv.innerHTML = `<strong>סיטואציה:</strong> ${scenarioDisplayTexts[key]}<br/><br/><strong>שלבי תוכנית הפעולה:</strong><ol><li>זיהוי סימני אזהרה</li><li>שאלי לשלומה</li><li>הקשבה לא שיפוטית</li><li>עזרי לה להתחבר לדמות מבוגרת אחראית</li><li>הדגישי את חשיבות החברות</li></ol>`;
 
       userInput.focus();
     });
@@ -174,13 +182,12 @@
       const text = userInput.value.trim();
       if (!text) return;
 
-      // Add user message to UI and to messages array
+      // Add user (supporter) message
       appendMessage('user', text);
       messages.push({ role: 'user', content: text });
       userInput.value = '';
 
       try {
-        // Build request body: include system prompt only for first user turn
         const body = {
           messages: messages.length === 1 ? [ { role: 'system', content: scenarioPrompt }, ...messages ] : messages
         };
@@ -194,7 +201,6 @@
         const data = await res.json();
         const reply = data.text || 'אין תגובה';
 
-        // Add bot message to UI and to messages array
         appendMessage('bot', reply);
         messages.push({ role: 'assistant', content: reply });
       } catch (err) {
