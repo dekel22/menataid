@@ -9,7 +9,7 @@
       font-family: Arial, sans-serif;
       background-color: #f4f4f4;
       padding: 1rem;
-      max-width: 600px;
+      max-width: 650px;
       margin: auto;
     }
 
@@ -56,7 +56,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       padding: 1rem;
-      min-height: 300px;
+      min-height: 320px;
       overflow-y: auto;
     }
 
@@ -119,7 +119,7 @@
     <div id="chat"></div>
 
     <div id="inputContainer">
-      <input id="userInput" type="text" placeholder="הקלד/י הודעה תומכת..." />
+      <input id="userInput" type="text" placeholder="הקלד/י תגובה תומכת..." />
       <button id="sendBtn">שלח</button>
     </div>
   </div>
@@ -133,21 +133,21 @@
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
 
-    // Display text for each scenario
+    // Detailed scenario text shown to user
     const scenarioDisplayTexts = {
-      worthless: 'חבר/ה אומר/ת: "אני לא שווה כלום"',
-      choking: 'חבר/ה אומר/ת: "הכול חונק אותי"',
-      loneliness: 'חבר/ה אומר/ת: "בדידות"'
+      worthless: 'קיץ, ערב מאוחר. אתם יושבים על ספסל צדדי בפארק מואר‑למחצה וציפורים כבר נרדמו. החבר/ה תופס/ת את השרוול שלך, מביט/ה מטה ולוחש/ת בקול שבור: "אני לא שווה כלום…"',
+      choking: 'אמצע יום עבודה לחוץ. אתם נפגשים לרגע בחדר מדרגות צר ומחניק, ריח טיח באוויר. החבר/ה נושם/ת במהירות, מצמיד/ה גב לקיר ואומר/ת בלחש רועד: "הכול חונק אותי…"',
+      loneliness: 'שבת אחה"צ בדירה שקטה. השמש מתבהרת מעבר לתריסים. החבר/ה עומד/ת מול החלון, עיניו משוטטות בין הגגות, ולוחש/ת: "בדידות… כל‑כך ריק כאן."'
     };
 
-    // Prompts for assistant to act as friend in distress
+    // Prompts: assistant = distressed friend who NEVER switches role
     const scenarioPrompts = {
-      worthless: 'את/ה החבר/ה במצוקה. תפתח/י בדברים כמו "אני לא שווה כלום" ותשתף/י בתחושות חוסר ערך. היה/י כנה ופגיע, תן/י למשתמש (התומך) מקום לעודד. ענה/י בעברית יומיומית.',
-      choking: 'את/ה החבר/ה במצוקה. פתח/י ב"הכול חונק אותי", פרט/י לחץ ומועקה, ושתף/י פחדים. היה/י פתוח/ה לתמיכה. ענה/י בעברית יומיומית.',
-      loneliness: 'את/ה החבר/ה במצוקה. פתח/י במילה "בדידות" ופרט/י תחושת ריק וניכור. היה/י כן ופגיע. ענה/י בעברית יומיומית.'
+      worthless: 'את/ה החבר/ה במצוקה. פתח/י באמירה "אני לא שווה כלום" ופרט/י תחושות חוסר ערך, בושה ואכזבה מעצמך. המשך/י להיות בצד המבקש תמיכה לאורך כל השיחה; אל תגלוש/י לתת עצות או לעודד את התומך. אפשר/י לעצמך לבטא רגשות (בכי, יאוש). הבע/י תודה על התמיכה אך אל תהפוך/י לתומך/ת. דבר/י בעברית יומיומית.',
+      choking: 'את/ה החבר/ה במצוקה. פתח/י במשפט "הכול חונק אותי" ופרט/י תחושות לחץ גופני, קוצר נשימה ופחד מאובדן שליטה. המשך/י לבטא מצוקה ולבקש עזרה רגשית; אל תגלוש/י לתת עצות לתומך. היה/י פגיע וכנה, הבע/י תודה אך שמור/י על תפקיד הנתמך.',
+      loneliness: 'את/ה החבר/ה במצוקה. פתח/י במילה "בדידות" והמשך/י לתאר תחושת ריק, ניכור וחוסר קשר אנושי. הישאר/י בתפקיד הנתמך למשך כל השיחה; אל תנסה/י לעודד את התומך. הבע/י כאב במילים פשוטות, ואל תפסיק/י לבקש הקשבה.'
     };
 
-    // Conversation state
+    // Conversation state (only user & bot messages stored)
     let messages = [];
     let scenarioPrompt = '';
 
@@ -156,7 +156,7 @@
       const key = scenarioSelect.value;
       scenarioPrompt = scenarioPrompts[key];
 
-      // Show chat area with scenario + action plan
+      // Show chat area with detailed scenario + action plan
       scenarioContainer.style.display = 'none';
       chatContainer.style.display = 'flex';
 
@@ -165,9 +165,9 @@
       userInput.focus();
     });
 
-    sendBtn.addEventListener('click', sendMessage);
+    sendBtn.addEventListener('click', sendUserMessage);
     userInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') sendMessage();
+      if (e.key === 'Enter') sendUserMessage();
     });
 
     function appendMessage(role, text) {
@@ -178,18 +178,22 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    async function sendMessage() {
+    async function sendUserMessage() {
       const text = userInput.value.trim();
       if (!text) return;
 
-      // Add user (supporter) message
+      // Add supporter message
       appendMessage('user', text);
       messages.push({ role: 'user', content: text });
       userInput.value = '';
 
+      await getBotReply();
+    }
+
+    async function getBotReply() {
       try {
         const body = {
-          messages: messages.length === 1 ? [ { role: 'system', content: scenarioPrompt }, ...messages ] : messages
+          messages: [ { role: 'system', content: scenarioPrompt }, ...messages ]
         };
 
         const res = await fetch('/api/chat', {
