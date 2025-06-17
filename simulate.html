@@ -36,7 +36,7 @@
 
     /* Chat area */
     #chatContainer {
-      display: none; /* Hidden until simulation starts */
+      display: none;
       flex-direction: column;
       gap: 0.5rem;
     }
@@ -60,18 +60,35 @@
       overflow-y: auto;
     }
 
+    /* Message bubbles */
     .message {
       margin: 0.5rem 0;
+      padding: 0.75rem 0.9rem;
+      border-radius: 10px;
+      max-width: 90%;
+      line-height: 1.4;
     }
 
     .user {
+      background-color: #cff5d3; /* soft green */
+      color: #064b1b;
       text-align: right;
-      color: #333;
+      margin-left: auto;
     }
 
     .bot {
+      background-color: #ffd6df; /* soft pink */
+      color: #5a1024;
       text-align: left;
-      color: #555;
+      margin-right: auto;
+    }
+
+    .evaluation {
+      background-color: #fff2b8; /* soft yellow */
+      color: #664600;
+      text-align: left;
+      margin-right: auto;
+      font-style: italic;
     }
 
     #inputContainer {
@@ -82,7 +99,7 @@
     }
 
     #userInput {
-      flex: 1 1 200px;
+      flex: 1 1 220px;
       padding: 0.75rem;
       font-size: 1rem;
       border-radius: 8px;
@@ -104,7 +121,7 @@
       font-size: 1rem;
       border: none;
       border-radius: 8px;
-      background-color: #777;
+      background-color: #676767;
       color: #fff;
       cursor: pointer;
     }
@@ -175,70 +192,4 @@
       scenarioContainer.style.display = 'none';
       chatContainer.style.display = 'flex';
 
-      instructionsDiv.innerHTML = `<strong>סיטואציה:</strong> ${scenarioDisplayTexts[key]}<br/><br/><strong>שלבי תוכנית הפעולה:</strong><ol><li>זיהוי סימני אזהרה</li><li>שאלי לשלומה</li><li>הקשבה לא שיפוטית</li><li>עזרי לה להתחבר לדמות מבוגרת אחראית</li><li>הדגישי את חשיבות החברות</li></ol>`;
-
-      userInput.focus();
-    });
-
-    sendBtn.addEventListener('click', sendUserMessage);
-    userInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') sendUserMessage();
-    });
-
-    evaluateBtn.addEventListener('click', evaluateConversation);
-
-    function appendMessage(role, text) {
-      const div = document.createElement('div');
-      div.className = `message ${role}`;
-      div.textContent = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    async function sendUserMessage() {
-      const text = userInput.value.trim();
-      if (!text) return;
-
-      appendMessage('user', text);
-      messages.push({ role: 'user', content: text });
-      userInput.value = '';
-
-      await getBotReply();
-    }
-
-    async function getBotReply() {
-      const body = {
-        messages: [{ role: 'system', content: scenarioPrompt }, ...messages]
-      };
-      await callApiAndAppend(body, 'bot');
-    }
-
-    async function evaluateConversation() {
-      if (messages.length === 0) return;
-      const evalBody = {
-        messages: [{ role: 'system', content: evaluationPrompt }, ...messages]
-      };
-      await callApiAndAppend(evalBody, 'bot');
-    }
-
-    async function callApiAndAppend(body, roleToAppend) {
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        const reply = data.text || 'אין תגובה';
-        appendMessage(roleToAppend, reply);
-        if (roleToAppend === 'bot') {
-          messages.push({ role: 'assistant', content: reply });
-        }
-      } catch (err) {
-        console.error('Error:', err);
-        appendMessage(roleToAppend, 'שגיאה בשליחת הבקשה.');
-      }
-    }
-  </script>
-</body>
-</html>
+      instructionsDiv.innerHTML = `<strong>סיטואציה:</strong> ${scenarioDisplayTexts[key]}<br/><br/><strong>שלבי תוכנית הפעולה:</strong><ol><li>זיהוי סימני אזהרה</li><li>שאלי לשלומה</li><li>הקש
