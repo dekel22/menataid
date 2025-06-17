@@ -34,34 +34,6 @@
       background-color: #fff;
     }
 
-    /* Instructions area (shown after scenario chosen) */
-    #instructionContainer {
-      display: none;
-      flex-direction: column;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    #instructionInput {
-      width: 100%;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      resize: vertical;
-    }
-
-    #startBtn {
-      align-self: flex-start;
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background-color: #d94d72;
-      color: #fff;
-      cursor: pointer;
-    }
-
     /* Chat area */
     #chatContainer {
       display: none; /* Hidden until simulation starts */
@@ -141,13 +113,6 @@
     </select>
   </div>
 
-  <!-- Instructions input (facilitator writes guidance) -->
-  <div id="instructionContainer">
-    <label for="instructionInput">כתוב/י הדרכות למשתמש לפני תחילת הסימולציה:</label>
-    <textarea id="instructionInput" rows="4" placeholder="למשל: \n- קרא בקול רם את המשפט שבחרת.\n- נסה לתאר במילים שלך מה אתה מרגיש." ></textarea>
-    <button id="startBtn">התחל סימולציה</button>
-  </div>
-
   <!-- Chat area -->
   <div id="chatContainer">
     <div id="instructionsDiv"></div>
@@ -162,9 +127,6 @@
   <script>
     const scenarioSelect = document.getElementById('scenarioSelect');
     const scenarioContainer = document.getElementById('scenarioContainer');
-    const instructionContainer = document.getElementById('instructionContainer');
-    const instructionInput = document.getElementById('instructionInput');
-    const startBtn = document.getElementById('startBtn');
     const chatContainer = document.getElementById('chatContainer');
     const instructionsDiv = document.getElementById('instructionsDiv');
     const chat = document.getElementById('chat');
@@ -186,20 +148,11 @@
       if (!scenarioSelect.value) return;
       scenarioPrompt = scenarioPrompts[scenarioSelect.value];
 
-      // Move to instruction step
+      // Show chat area with integrated action plan
       scenarioContainer.style.display = 'none';
-      instructionContainer.style.display = 'flex';
-      instructionInput.focus();
-    });
-
-    startBtn.addEventListener('click', () => {
-      const instructionsText = instructionInput.value.trim();
-      instructionContainer.style.display = 'none';
       chatContainer.style.display = 'flex';
 
-      if (instructionsText) {
-        instructionsDiv.textContent = instructionsText;
-      }
+      instructionsDiv.innerHTML = '<strong>שלבי תוכנית הפעולה:</strong><ol><li>זיהוי סימני אזהרה</li><li>שאלי לשלומה</li><li>הקשבה לא שיפוטית</li><li>עזרי לה להתחבר לדמות מבוגרת אחראית</li><li>הדגישי את חשיבות החברות</li></ol>';
 
       userInput.focus();
     });
