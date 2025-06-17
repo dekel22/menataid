@@ -17,6 +17,26 @@
       color: #d94d72;
       text-align: center;
     }
+    /* כפתור התקשרות קבוע בעיצוב זהה */
+  .eren-call{
+    display:inline-block;
+    margin-top:1.5rem;           /* רווח מעל הכפתור */
+    padding:1rem;
+    font-size:1rem;
+    border:none;
+    border-radius:8px;
+    background-color:#d94d72;    /* אותו ורוד של הכפתורים האחרים */
+    color:#fff;
+    text-align:center;
+    text-decoration:none;        /* שלא ייראה כמו קישור */
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    cursor:pointer;
+    transition:background-color .3s;
+  }
+  .eren-call:hover{
+    background-color:#c03d60;    /* צבע ה-hover הזהה */
+  }
+
 
     #selectedRole {
       display: none;
@@ -137,9 +157,7 @@
     </button>
   </div>
 <!-- כפתור התקשר לערן -->
-<button id="callEran" onclick="location.href='tel:+972501234567'">
-  התקשר לערן
-</button>
+<a href="tel:1201" class="eren-call">דבר עם ער"ן ‎1201</a>
 
 <style>
   /* כפתור קבוע בפינה */
