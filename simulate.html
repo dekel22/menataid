@@ -154,42 +154,101 @@
   </div>
 
   <script>
-    const scenarioSelect = document.getElementById('scenarioSelect');
+    // === DOM Elements ===
+    const scenarioSelect   = document.getElementById('scenarioSelect');
     const scenarioContainer = document.getElementById('scenarioContainer');
-    const chatContainer = document.getElementById('chatContainer');
-    const instructionsDiv = document.getElementById('instructionsDiv');
-    const chat = document.getElementById('chat');
-    const userInput = document.getElementById('userInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const evaluateBtn = document.getElementById('evaluateBtn');
+    const chatContainer    = document.getElementById('chatContainer');
+    const instructionsDiv  = document.getElementById('instructionsDiv');
+    const chat             = document.getElementById('chat');
+    const userInput        = document.getElementById('userInput');
+    const sendBtn          = document.getElementById('sendBtn');
+    const evaluateBtn      = document.getElementById('evaluateBtn');
 
-    // Detailed scenario text shown to user
+    // === Scenario texts ===
     const scenarioDisplayTexts = {
-      worthless: 'קיץ, ערב מאוחר. אתם יושבים על ספסל צדדי בפארק מואר‑למחצה וציפורים כבר נרדמו. החבר/ה תופס/ת את השרוול שלך, מביט/ה מטה ולוחש/ת בקול שבור: "אני לא שווה כלום…"',
-      choking: 'אמצע יום עבודה לחוץ. אתם נפגשים לרגע בחדר מדרגות צר ומחניק, ריח טיח באוויר. החבר/ה נושם/ת במהירות, מצמיד/ה גב לקיר ואומר/ת בלחש רועד: "הכול חונק אותי…"',
-      loneliness: 'שבת אחה"צ בדירה שקטה. השמש מתבהרת מעבר לתריסים. החבר/ה עומד/ת מול החלון, עיניו משוטטות בין הגגות, ולוחש/ת: "בדידות… כל‑כך ריק כאן."'
+      worthless: 'קיץ, ערב מאוחר. אתם יושבים על ספסל צדדי בפארק מואר‑למחצה, והחבר/ה לוחש/ת: "אני לא שווה כלום…"',
+      choking:   'אמצע יום עבודה לחוץ. בחדר מדרגות מחניק החבר/ה אומר/ת: "הכול חונק אותי…"',
+      loneliness:'שבת אחה"צ בדירה שקטה. החבר/ה מביט/ה החוצה ולוחש/ת: "בדידות… כל‑כך ריק כאן."'
     };
 
-    // Prompts: assistant = distressed friend who NEVER switches role
+    // Assistant prompts (friend in distress)
     const scenarioPrompts = {
-      worthless: 'את/ה החבר/ה במצוקה. פתח/י באמירה "אני לא שווה כלום" ופרט/י תחושות חוסר ערך, בושה ואכזבה מעצמך. המשך/י להיות בצד המבקש תמיכה לאורך כל השיחה; אל תגלוש/י לתת עצות או לעודד את התומך. אפשר/י לעצמך לבטא רגשות (בכי, יאוש). הבע/י תודה על התמיכה אך אל תהפוך/י לתומך/ת. דבר/י בעברית יומיומית.',
-      choking: 'את/ה החבר/ה במצוקה. פתח/י במשפט "הכול חונק אותי" ופרט/י תחושות לחץ גופני, קוצר נשימה ופחד מאובדן שליטה. המשך/י לבטא מצוקה ולבקש עזרה רגשית; אל תגלוש/י לתת עצות לתומך. היה/י פגיע וכנה, הבע/י תודה אך שמור/י על תפקיד הנתמך.',
-      loneliness: 'את/ה החבר/ה במצוקה. פתח/י במילה "בדידות" והמשך/י לתאר תחושת ריק, ניכור וחוסר קשר אנושי. הישאר/י בתפקיד הנתמך למשך כל השיחה; אל תנסה/י לעודד את התומך. הבע/י כאב במילים פשוטות, ואל תפסיק/י לבקש הקשבה.'
+      worthless: 'את/ה החבר/ה במצוקה. פתח/י ב"אני לא שווה כלום" והמשך/י לפרט תחושות חוסר ערך. הישאר/י בצד הנתמך לאורך כל השיחה.',
+      choking:   'את/ה החבר/ה במצוקה. פתח/י ב"הכול חונק אותי" ותאר/י לחץ וקוצר נשימה. הישאר/י נתמך/ת.',
+      loneliness:'את/ה החבר/ה במצוקה. פתח/י ב"בדידות" ושתף/י תחושת ריק וניכור. הישאר/י נתמך/ת.'
     };
 
     // Evaluation prompt
-    const evaluationPrompt = 'את/ה פסיכולוג/ית קליני/ת. על סמך ההודעות של המשתמש (role: user) בשיחה הבאה, הערך/י בכנות אך בעדינות עד כמה היה/תה תומך/ת, מכיל/ה ואמפתי/ת. כתוב/י שתי פסקאות: תחילה פידבק חיובי (מה עבד טוב), ולאחר מכן הצעה קונקרטית אחת או שתיים לשיפור. דבר/י בעברית פשוטה וחיובית.';
+    const evaluationPrompt = 'את/ה פסיכולוג/ית קליני/ת. הערך/י את התמיכה שהמשתמש סיפק, בפידבק חיובי ואז הצעת שיפור.';
 
-    // Conversation state
+    // === Conversation state ===
     let messages = [];
-    let scenarioPrompt = '';
+    let scenarioSystemPrompt = '';
 
-    scenarioSelect.addEventListener('change', () => {
-      if (!scenarioSelect.value) return;
+    // === Event listeners ===
+    scenarioSelect.addEventListener('change', handleScenarioSelect);
+    sendBtn.addEventListener('click', handleSend);
+    userInput.addEventListener('keyup', e => { if (e.key === 'Enter') handleSend(); });
+    evaluateBtn.addEventListener('click', handleEvaluate);
+
+    // === Functions ===
+    function handleScenarioSelect() {
       const key = scenarioSelect.value;
-      scenarioPrompt = scenarioPrompts[key];
+      if (!key) return;
 
+      // Prepare UI
       scenarioContainer.style.display = 'none';
       chatContainer.style.display = 'flex';
+      instructionsDiv.innerHTML = `<strong>סיטואציה:</strong> ${scenarioDisplayTexts[key]}<br/><br/><strong>שלבי תוכנית הפעולה:</strong><ol><li>זיהוי סימני אזהרה</li><li>שאלי לשלומה</li><li>הקשבה לא‑שיפוטית</li><li>חיבור לדמות מבוגרת אחראית</li><li>הדגשת חשיבות החברות</li></ol>`;
 
-      instructionsDiv.innerHTML = `<strong>סיטואציה:</strong> ${scenarioDisplayTexts[key]}<br/><br/><strong>שלבי תוכנית הפעולה:</strong><ol><li>זיהוי סימני אזהרה</li><li>שאלי לשלומה</li><li>הקש
+      // Reset state
+      messages = [];
+      scenarioSystemPrompt = scenarioPrompts[key];
+      userInput.focus();
+    }
+
+    function appendMessage(roleClass, text) {
+      const div = document.createElement('div');
+      div.className = `message ${roleClass}`;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function handleSend() {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      // Add user message
+      appendMessage('user', text);
+      messages.push({ role: 'user', content: text });
+      userInput.value = '';
+
+      // Get assistant reply
+      fetchChat([{ role: 'system', content: scenarioSystemPrompt }, ...messages], 'bot');
+    }
+
+    function handleEvaluate() {
+      if (messages.length === 0) return;
+      fetchChat([{ role: 'system', content: evaluationPrompt }, ...messages], 'evaluation');
+    }
+
+    async function fetchChat(bodyMessages, roleForBubble) {
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: bodyMessages })
+        });
+        const data = await res.json();
+        const reply = data.text || 'אין תגובה';
+        appendMessage(roleForBubble, reply);
+        messages.push({ role: 'assistant', content: reply });
+      } catch (err) {
+        console.error('API error:', err);
+        appendMessage(roleForBubble, 'שגיאה בשליחת הבקשה.');
+      }
+    }
+  </script>
+</body>
+</html>
