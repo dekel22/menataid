@@ -1,22 +1,24 @@
 // pages/api/save-settings.js
-import { clientPromise } from '@/lib/mongodb';
+import { clientPromise } from 'mongotest';   // ← נתיב יחסי, בלי alias
 
 export default async function handler(req, res) {
-  console.log('➡️ [/api/save-settings] %s', req.method);
+  console.log('➡️ [/api/save-settings]', req.method);
 
-  // מקבלים רק POST
-  if (req.method !== 'POST')
+  // 1) מקבלים רק POST
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-  // ---- נתונים שמגיעים מה-Client ----
+  // 2) שליפת הנתונים מה-Client
   const { userId, name, age, style, progress } = req.body ?? {};
 
-  // בדיקת שדות חובה
-  if (!userId || !name || age == null)
+  if (!userId || !name || age == null) {
     return res.status(400).json({ error: 'Missing required fields' });
+  }
 
+  // 3) Upsert ב-Mongo
   try {
-    const client      = await clientPromise;                 // singleton
+    const client      = await clientPromise;                // connection singleton
     const collection  = client.db('myformdb').collection('formdata');
 
     await collection.updateOne(
@@ -28,7 +30,7 @@ export default async function handler(req, res) {
       { upsert: true }
     );
 
-    console.log('🗄️  Saved for user', userId);
+    console.log('🗄️ Saved settings for', userId);
     return res.status(200).json({ success: true });
   } catch (err) {
     console.error('💥 Mongo error:', err);
