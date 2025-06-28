@@ -4,59 +4,65 @@
   <meta charset="UTF-8">
   <title>התחברות עם Google – דוגמה</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Google Identity Services -->
+
+  <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <style>
     body {margin:0;font-family:Arial, sans-serif;background:#f3f4f6;text-align:center}
-    .header {background:#f66da0;color:#fff;padding:1rem;font-weight:bold}
+    .header {background:#f66da0;color:#fff;font-weight:bold;padding:1rem}
     .sub-header {background:#d2f3f9;padding:1rem;font-size:1.2rem}
-    .login-box {background:#fff;margin:2rem auto;padding:2rem;border-radius:20px;max-width:400px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
-    #emailDisplay {margin-top:1rem;color:#333;font-weight:bold}
+    .login-box {background:#fff;margin:2rem auto;padding:2rem;max-width:400px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+    #emailDisplay {margin-top:1rem;font-weight:bold;color:#333}
   </style>
 </head>
 <body>
   <div class="header">ברוכים הבאים</div>
-  <div class="sub-header">התחבר/י עם חשבון Google</div>
+  <div class="sub-header">התחבר/י עם חשבון Google</div>
 
   <div class="login-box">
-    <!-- One Tap / Sign‑In button configuration -->
-    <div id="g_id_onload"
-         data-client_id="181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse"
-         data-context="signin">
-    </div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-size="large"
-         data-theme="outline"
-         data-text="signin_with"
-         data-shape="rectangular"
-         data-logo_alignment="left"></div>
-
-    <!-- where we show the email after login -->
+    <!-- כאן יוצג כפתור הכניסה -->
+    <div id="signInDiv"></div>
     <p id="emailDisplay"></p>
   </div>
 
   <script>
-    // Decode JWT (ID token) to extract user info
-    function parseJwt(token) {
-      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const json = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    /* Decode the JWT (ID token) that Google returns */
+    function parseJwt (token) {
+      const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      const json = decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
       return JSON.parse(json);
     }
 
-    // Callback from Google Identity Services
-    function handleCredentialResponse(response) {
+    function handleCredentialResponse (response) {
       const payload = parseJwt(response.credential);
-      const email = payload.email;            // <-- כתובת‑המייל של המשתמש
+      const email   = payload.email;
       console.log('Email:', email);
 
-      // Show it on the page (demo only)
+      // show on screen (demo only)
       document.getElementById('emailDisplay').textContent = 'התחברת כ‑' + email;
 
-      // Store locally for reuse across pages (demo only)
+      // store locally so שתוכל לשלוף בדפים אחרים
       sessionStorage.setItem('userEmail', email);
     }
+
+    // wait until the SDK has loaded
+    window.onload = () => {
+      google.accounts.id.initialize({
+        client_id: '181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com', 
+        callback: handleCredentialResponse,
+        use_fedcm_for_prompt: false // עקיפה: לא מחייב COOP מחמיר
+      });
+
+      // render the Google sign‑in button
+      google.accounts.id.renderButton(
+        document.getElementById('signInDiv'),
+        { theme:'outline', size:'large', shape:'rectangular', text:'signin_with' }
+      );
+
+      // optional: show One Tap prompt
+      // google.accounts.id.prompt();
+    };
   </script>
 </body>
 </html>
