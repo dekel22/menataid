@@ -1,5 +1,5 @@
 // pages/api/save-settings.js
-import { clientPromise } from 'mongotest';   // ← נתיב יחסי, בלי alias
+import { clientPromise } from '../../lib/mongodb';   // ← נתיב יחסי, בלי alias
 
 export default async function handler(req, res) {
   console.log('➡️ [/api/save-settings]', req.method);
