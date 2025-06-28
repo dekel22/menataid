@@ -2,66 +2,76 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>התחברות עם Google – דוגמה</title>
+  <title>Google Login – Redirect Flow Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- \u05E9\u05D9\u05DE\u05D4 \u05DB\u05D5\u05EA\u05E8\u05D5\u05EA COOP/COEP \u05E9\u05E2\u05D5\u05E8 \u05DC\u05D2\u05D5\u05D2\u05DC Google Sign‑In -->
-  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
-  <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none" />
+  <!-- 1️⃣ No more COOP headaches: this page does full‑page *redirect* instead of pop‑up → postMessage is not used. -->
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" /> <!-- אפשר להשאיר ברירת‑מחדל -->
 
-  <!-- Google Identity Services SDK -->
+  <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
-    body {margin:0;font-family:Arial, sans-serif;background:#f3f4f6;text-align:center}
-    .header {background:#f66da0;color:#fff;font-weight:bold;padding:1rem}
-    .sub-header {background:#d2f3f9;padding:1rem;font-size:1.2rem}
-    .login-box {background:#fff;margin:2rem auto;padding:2rem;max-width:400px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
-    #emailDisplay {margin-top:1rem;font-weight:bold;color:#333}
+    body{margin:0;font-family:Arial, sans-serif;background:#f3f4f6;text-align:center}
+    .header{background:#f66da0;color:#fff;font-weight:bold;padding:1rem}
+    .sub-header{background:#d2f3f9;padding:1rem;font-size:1.2rem}
+    .login-box{background:#fff;margin:2rem auto;padding:2rem;max-width:400px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+    #emailDisplay{margin-top:1rem;font-weight:bold;color:#333}
   </style>
 </head>
 <body>
   <div class="header">ברוכים הבאים</div>
-  <div class="sub-header">התחבר/י עם חשבון Google</div>
+  <div class="sub-header">התחבר/י עם חשבון Google (Redirect)</div>
 
   <div class="login-box">
-    <!-- כאן יוצג כפתור הכניסה -->
-    <div id="signInDiv"></div>
+
+    <!-- 2️⃣ GIS auto‑initialises from this div.  ux_mode=redirect means a full‑page round‑trip → no postMessage → no COOP issues.  -->
+    <div id="g_id_onload"
+         data-client_id="181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com"
+         data-ux_mode="redirect"
+         data-login_uri="/login.html"  <!-- back to this same page -->
+         data-auto_prompt="false">
+    </div>
+
+    <!-- 3️⃣ The visible Sign‑In button (standard) -->
+    <div class="g_id_signin"
+         data-type="standard"
+         data-size="large"
+         data-theme="outline"
+         data-shape="rectangular"
+         data-text="signin_with"
+         data-logo_alignment="left"></div>
+
     <p id="emailDisplay"></p>
   </div>
 
   <script>
-    /* Decode the JWT (ID token) that Google returns */
-    function parseJwt (token) {
-      const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-      const json = decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-      return JSON.parse(json);
+    /* Helper to decode a JWT (ID token) */
+    function parseJwt(token) {
+      try {
+        const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+        const json = decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(json);
+      } catch (e) { return {}; }
     }
 
-    function handleCredentialResponse (response) {
-      const payload = parseJwt(response.credential);
-      const email   = payload.email;
-      console.log('Email:', email);
+    // 4️⃣ If we just returned from Google, the token arrives as a query parameter: ?credential=...   (because ux_mode=redirect)
+    const qs = new URLSearchParams(location.search);
 
-      // show on screen (demo only)
-      document.getElementById('emailDisplay').textContent = 'התחברת כ‑' + email;
+    const token = qs.get('credential');
+    if (token) {
+      const { email, name } = parseJwt(token);
+      document.getElementById('emailDisplay').textContent = `התחברת כ‑${email || 'לא ידוע'}`;
 
-      // store locally so שתוכל לשלוף בדפים אחרים
-      sessionStorage.setItem('userEmail', email);
+      // keep for other pages (demo only)
+      sessionStorage.setItem('userEmail', email || '');
+
+      // clean the URL (remove long query string) – optional
+      if (history.replaceState) {
+        const cleanUrl = location.origin + location.pathname;
+        history.replaceState(null, '', cleanUrl);
+      }
     }
-
-    window.onload = () => {
-      google.accounts.id.initialize({
-        client_id: '181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com', 
-        callback: handleCredentialResponse,
-        use_fedcm_for_prompt: false
-      });
-
-      google.accounts.id.renderButton(
-        document.getElementById('signInDiv'),
-        { theme:'outline', size:'large', shape:'rectangular', text:'signin_with' }
-      );
-    };
   </script>
 </body>
 </html>
