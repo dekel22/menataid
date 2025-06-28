@@ -99,7 +99,7 @@
       try {
         const res = await fetch('/api/save-settings', {
           method: 'POST',
-          credentials: 'same-origin',        // ⬅️ שולח את ה-cookie של NextAuth
+       
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
