@@ -2,14 +2,14 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>Google Login – Popup → mainpage.html</title>
+  <title>Google Login – Popup + DB Check</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- COOP מרוכך כדי לאפשר postMessage מה‑popup -->
   <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
   <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none" />
 
-  <!-- Google Identity Services SDK -->
+  <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
@@ -17,6 +17,10 @@
     .header{background:#f66da0;color:#fff;font-weight:bold;padding:1rem}
     .sub-header{background:#d2f3f9;padding:1rem;font-size:1.2rem}
     .login-box{background:#fff;margin:2rem auto;padding:2rem;max-width:400px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+    /* פופ‑אפ פשוט */
+    #popupOverlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:9999}
+    #popup{background:#fff;border-radius:12px;max-width:320px;padding:1.5rem;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+    #popup button{margin-top:1rem;padding:.5rem 1rem;border:none;border-radius:6px;background:#f66da0;color:#fff;font-weight:bold;cursor:pointer}
   </style>
 </head>
 <body>
@@ -24,37 +28,75 @@
   <div class="sub-header">התחבר/י עם חשבון Google</div>
 
   <div class="login-box">
-    <!-- יתווסף כאן כפתור הכניסה -->
     <div id="signInDiv"></div>
   </div>
 
+  <!-- פופ‑אפ -->
+  <div id="popupOverlay">
+    <div id="popup">
+      <p id="popupMsg"></p>
+      <button id="popupBtn">אישור</button>
+    </div>
+  </div>
+
   <script>
-    // Decode a JWT (ID token) safely
-    function parseJwt(token) {
-      try {
-        const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-        const json = decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    /** Decode JWT safely */
+    function parseJwt(token){
+      try{
+        const base64=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+        const json=decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
         return JSON.parse(json);
-      } catch { return {}; }
+      }catch{return{};}
     }
 
-    function handleCredentialResponse(response) {
-      const { email } = parseJwt(response.credential);
-      sessionStorage.setItem('userEmail', email || '');
-      // מעבר לדף הראשי מיד לאחר זיהוי
-      window.location.href = '/mainpage.html';
+    /** Mini popup helper */
+    function showPopup(msg,cb){
+      const ov=document.getElementById('popupOverlay');
+      document.getElementById('popupMsg').textContent=msg;
+      ov.style.display='flex';
+      const btn=document.getElementById('popupBtn');
+      const h=()=>{ov.style.display='none';btn.removeEventListener('click',h);cb();};
+      btn.addEventListener('click',h);
     }
 
-    window.onload = () => {
+    /** Ask /api/get-settings if the user exists */
+    async function checkUserAndRoute(email){
+      try{
+        const res=await fetch(`/api/get-settings?userId=${encodeURIComponent(email)}`); // GET, same handler
+        if(res.ok){
+          showPopup(`ברוך/ה הבא/ה, ${email}!`,()=>window.location.href='/mainpage.html');
+        }else if(res.status===404){
+          showPopup('משתמש חדש! נעבור להגדרות.',()=>window.location.href='/settings.html');
+        }else if(res.status===405){
+          console.error('Method not allowed → וודא שהבקשה היא GET');
+          showPopup('דרישת שרת לא נתמכת.',()=>window.location.href='/settings.html');
+        }else{
+          console.error('Unexpected status',res.status);
+          showPopup('שגיאה בשרת, נמשיך להגדרות.',()=>window.location.href='/settings.html');
+        }
+      }catch(err){
+        console.error('Fetch error',err);
+        showPopup('אין תקשורת, ננסה שוב מאוחר יותר.',()=>window.location.reload());
+      }
+    }
+
+    function handleCredentialResponse(resp){
+      const {email}=parseJwt(resp.credential);
+      if(!email){showPopup('לא ניתן לאמת מייל',()=>{});return;}
+      sessionStorage.setItem('userEmail',email);
+      checkUserAndRoute(email);
+    }
+
+    window.onload=()=>{
       google.accounts.id.initialize({
-        client_id: '181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com', 
-        callback: handleCredentialResponse,
-        ux_mode: 'popup',
-        use_fedcm_for_prompt: false
+        client_id:'YOUR_CLIENT_ID.apps.googleusercontent.com',
+        callback:handleCredentialResponse,
+        ux_mode:'popup',
+        use_fedcm_for_prompt:false
       });
       google.accounts.id.renderButton(
         document.getElementById('signInDiv'),
-        { theme:'outline', size:'large', shape:'rectangular', text:'signin_with' }
+        {theme:'outline',size:'large',shape:'rectangular',text:'signin_with'}
       );
     };
   </script>
