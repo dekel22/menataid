@@ -1,56 +1,64 @@
-import { MongoClient } from 'mongodb';
+// pages/api/save-settings.js
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]'; // נתיב לעץ שלך
-
-const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri, { useUnifiedTopology: true });
+import { authOptions } from './auth/[...nextauth]';
+import { clientPromise } from '@/lib/mongodb';
 
 export default async function handler(req, res) {
-  // קבל רק POST
+  console.log('➡️  [/api/save-settings] New request:', req.method);
+
+  // 1) קבל רק POST
   if (req.method !== 'POST') {
+    console.warn('⚠️  Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  //  1. שלוף את ה-session של NextAuth
+  // 2) Session
   const session = await getServerSession(req, res, authOptions);
-  if (!session) return res.status(401).json({ error: 'Not authenticated' });
+  if (!session) {
+    console.warn('🔒  No session – returning 401');
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  console.log('✅  Session found for:', session.user.email);
 
-  //  2. קח מזהה ייחודי מה-Google profile
-  //    ברוב הקונפיגים זה user.id או user.email; ודא בקונסול שלך.
-  const userKey = session.user.id || session.user.email;
-  if (!userKey) {
-    return res.status(400).json({ error: 'Missing Google user id/email in session' });
+  // 3) User key
+  const userId = session.user.id || session.user.email;
+  if (!userId) {
+    console.error('❌  Session missing user id/email:', session);
+    return res.status(400).json({ error: 'Missing user id' });
   }
 
-  //  3. נתוני הטופס
+  // 4) Body validation
   const { name, age, style, progress } = req.body || {};
   if (!name || age == null) {
+    console.warn('⚠️  Bad payload:', req.body);
     return res.status(400).json({ error: 'Missing required fields' });
   }
+  console.log('📦  Payload OK');
 
+  // 5) DB upsert
   try {
-    await client.connect();
-    const db = client.db('myformdb');
-    const collection = db.collection('formdata');
+    const client = await clientPromise;                 // singleton
+    const collection = client.db('myformdb').collection('formdata');
 
-    //  4. Upsert לפי _id = userKey
     const result = await collection.updateOne(
-      { _id: userKey },                             // מזהה ייחודי
+      { _id: userId },
       {
-        $set: {
-          name, age, style, progress,
-          updatedAt: new Date()
-        },
-        $setOnInsert: { createdAt: new Date() }     // רק בהכנסה ראשונית
+        $set: { name, age, style, progress, updatedAt: new Date() },
+        $setOnInsert: { createdAt: new Date() }
       },
       { upsert: true }
     );
 
-    res.status(200).json({ success: true, upserted: result.upsertedId || false });
+    console.log(
+      '🗄️  Mongo result:',
+      result.matchedCount
+        ? `updated existing doc for ${userId}`
+        : `inserted new doc _id=${result.upsertedId?._id}`
+    );
+
+    return res.status(200).json({ success: true });
   } catch (err) {
-    console.error('MongoDB error:', err);
-    res.status(500).json({ error: err.message });
-  } finally {
-    await client.close();
+    console.error('💥  MongoDB error:', err);
+    return res.status(500).json({ error: 'Server error' });
   }
 }
