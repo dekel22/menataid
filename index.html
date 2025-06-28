@@ -5,6 +5,10 @@
   <title>התחברות עם Google – דוגמה</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- \u05E9\u05D9\u05DE\u05D4 \u05DB\u05D5\u05EA\u05E8\u05D5\u05EA COOP/COEP \u05E9\u05E2\u05D5\u05E8 \u05DC\u05D2\u05D5\u05D2\u05DC Google Sign‑In -->
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none" />
+
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -46,22 +50,17 @@
       sessionStorage.setItem('userEmail', email);
     }
 
-    // wait until the SDK has loaded
     window.onload = () => {
       google.accounts.id.initialize({
         client_id: '181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com', 
         callback: handleCredentialResponse,
-        use_fedcm_for_prompt: false // עקיפה: לא מחייב COOP מחמיר
+        use_fedcm_for_prompt: false
       });
 
-      // render the Google sign‑in button
       google.accounts.id.renderButton(
         document.getElementById('signInDiv'),
         { theme:'outline', size:'large', shape:'rectangular', text:'signin_with' }
       );
-
-      // optional: show One Tap prompt
-      // google.accounts.id.prompt();
     };
   </script>
 </body>
