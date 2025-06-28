@@ -1,6 +1,4 @@
 // pages/api/save-settings.js
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
 import { clientPromise } from '@/lib/mongodb';
 
 export default async function handler(req, res) {
