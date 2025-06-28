@@ -2,81 +2,61 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>התחברות עם גוגל</title>
+  <title>התחברות עם Google – דוגמה</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      text-align: center;
-    }
-
-    .header {
-      background-color: #f66da0;
-      color: white;
-      padding: 1rem;
-      font-weight: bold;
-    }
-
-    .sub-header {
-      background-color: #d2f3f9;
-      padding: 1rem;
-      font-size: 1.2rem;
-    }
-
-    .login-box {
-      background: white;
-      margin: 2rem auto;
-      padding: 2rem;
-      border-radius: 20px;
-      max-width: 400px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
+    body {margin:0;font-family:Arial, sans-serif;background:#f3f4f6;text-align:center}
+    .header {background:#f66da0;color:#fff;padding:1rem;font-weight:bold}
+    .sub-header {background:#d2f3f9;padding:1rem;font-size:1.2rem}
+    .login-box {background:#fff;margin:2rem auto;padding:2rem;border-radius:20px;max-width:400px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+    #emailDisplay {margin-top:1rem;color:#333;font-weight:bold}
   </style>
 </head>
 <body>
-
-  <div class="header">עזרה ראשונה נפשית -התחברות</div>
+  <div class="header">ברוכים הבאים</div>
+  <div class="sub-header">התחבר/י עם חשבון Google</div>
 
   <div class="login-box">
+    <!-- One Tap / Sign‑In button configuration -->
     <div id="g_id_onload"
-         data-client_id="181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com"
+         data-client_id="YOUR_CLIENT_ID.apps.googleusercontent.com"
          data-callback="handleCredentialResponse"
-         data-auto_prompt="true"
-         data-auto_select="true">
+         data-context="signin">
     </div>
-
-    <!-- כפתור התחברות נוסף, למקרה שהאוטומטי נכשל -->
     <div class="g_id_signin"
          data-type="standard"
-         data-shape="rectangular"
-         data-theme="outline"
-         data-text="sign_in_with"
          data-size="large"
-         data-logo_alignment="right">
-    </div>
+         data-theme="outline"
+         data-text="signin_with"
+         data-shape="rectangular"
+         data-logo_alignment="left"></div>
+
+    <!-- where we show the email after login -->
+    <p id="emailDisplay"></p>
   </div>
 
   <script>
-    function decodeJwtResponse(token) {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
+    // Decode JWT (ID token) to extract user info
+    function parseJwt(token) {
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+      return JSON.parse(json);
     }
 
+    // Callback from Google Identity Services
     function handleCredentialResponse(response) {
-      const data = decodeJwtResponse(response.credential);
-      localStorage.setItem("userName", data.name);
-      localStorage.setItem("userEmail", data.email);
-      localStorage.setItem("userPic", data.picture);
-      window.location.href = "mainpage.html";
+      const payload = parseJwt(response.credential);
+      const email = payload.email;            // <-- כתובת‑המייל של המשתמש
+      console.log('Email:', email);
+
+      // Show it on the page (demo only)
+      document.getElementById('emailDisplay').textContent = 'התחברת כ‑' + email;
+
+      // Store locally for reuse across pages (demo only)
+      sessionStorage.setItem('userEmail', email);
     }
   </script>
-
 </body>
 </html>
