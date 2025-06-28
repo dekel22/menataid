@@ -45,6 +45,24 @@
       box-sizing: border-box;
     }
 
+    /* Save button */
+    .save-btn {
+      background-color: #d94d72;
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: block;
+      margin: 1rem auto 0;
+      transition: background 0.2s ease-in-out;
+    }
+
+    .save-btn:hover {
+      background-color: #b33d5e;
+    }
+
     /* Progress section */
     .progress-section {
       background: #fff;
@@ -91,7 +109,7 @@
 <body>
   <h1>הגדרות</h1>
 
-  <form>
+  <form id="userSettingsForm">
     <label for="name">שם</label>
     <input type="text" id="name" name="name" placeholder="הכנס/י את שמך" />
 
@@ -100,6 +118,9 @@
 
     <label for="style">סגנון מועדף</label>
     <input type="text" id="style" name="style" placeholder="לדוגמה: רוק, פופ, קלאסי" />
+
+    <!-- Save button -->
+    <button type="button" id="saveSettings" class="save-btn">שמור הגדרות</button>
   </form>
 
   <div class="progress-section">
@@ -135,5 +156,47 @@
       <div class="lesson"><input type="checkbox" id="m3l5" /><label for="m3l5">שיעור 5</label></div>
     </div>
   </div>
+
+  <script>
+    // אסוף את כל הנתונים מהטופס ומהצ'קבוקסים
+    function collectSettings() {
+      const lessons = Array.from(document.querySelectorAll('.lesson input[type="checkbox"]'));
+      const progress = lessons.reduce((acc, checkbox) => {
+        acc[checkbox.id] = checkbox.checked;
+        return acc;
+      }, {});
+
+      return {
+        name: document.getElementById('name').value.trim(),
+        age: Number(document.getElementById('age').value),
+        style: document.getElementById('style').value.trim(),
+        progress
+      };
+    }
+
+    // שליחת הנתונים לשרת (בהמשך תעדכן ל־MongoDB)
+    document.getElementById('saveSettings').addEventListener('click', async () => {
+      const payload = collectSettings();
+
+      try {
+        const response = await fetch('/api/save-settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          alert('ההגדרות נשמרו בהצלחה');
+        } else {
+          alert('אירעה שגיאה בשמירת ההגדרות');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('אירעה שגיאה בשמירת ההגדרות');
+      }
+    });
+  </script>
 </body>
 </html>
