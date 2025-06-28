@@ -5,105 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>הגדרות משתמש</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      padding: 1rem;
-      max-width: 600px;
-      margin: auto;
-    }
-
-    h1 {
-      color: #d94d72;
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    form {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 0.75rem;
-      font-weight: bold;
-      color: #555;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    select {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.3rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-
-    /* Save button */
-    .save-btn {
-      background-color: #d94d72;
-      color: #fff;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-      display: block;
-      margin: 1rem auto 0;
-      transition: background 0.2s ease-in-out;
-    }
-
-    .save-btn:hover {
-      background-color: #b33d5e;
-    }
-
-    /* Progress section */
-    .progress-section {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      padding: 1.5rem;
-    }
-
-    .progress-section h2 {
-      color: #d94d72;
-      margin-top: 0;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .module {
-      margin-bottom: 1.25rem;
-      border-top: 1px solid #eee;
-      padding-top: 1rem;
-    }
-
-    .module:first-of-type {
-      border-top: none;
-      padding-top: 0;
-    }
-
-    .module h3 {
-      margin: 0 0 0.75rem 0;
-      color: #333;
-    }
-
-    .lesson {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .lesson label {
-      margin: 0 0 0 0.5rem;
-      font-weight: normal;
-    }
+    body{font-family:Arial, sans-serif;background:#f4f4f4;padding:1rem;max-width:600px;margin:auto}
+    h1{color:#d94d72;text-align:center;margin-bottom:1.5rem}
+    form,.progress-section{background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1);padding:1.5rem;margin-bottom:2rem}
+    label{display:block;margin-bottom:.75rem;font-weight:bold;color:#555}
+    input[type=text],input[type=number],select{width:100%;padding:.5rem;margin-top:.3rem;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}
+    .save-btn{background:#d94d72;color:#fff;padding:.6rem 1.2rem;border:none;border-radius:4px;font-size:1rem;cursor:pointer;display:block;margin:1rem auto 0;transition:background .2s}
+    .save-btn:hover{background:#b33d5e}
+    .progress-section h2{color:#d94d72;text-align:center;margin:0 0 1rem}
+    .module{margin-bottom:1.25rem;border-top:1px solid #eee;padding-top:1rem}
+    .module:first-of-type{border-top:none;padding-top:0}
+    .module h3{margin:0 0 .75rem;color:#333}
+    .lesson{display:flex;align-items:center;margin-bottom:.5rem}
+    .lesson label{margin:0 0 0 .5rem;font-weight:normal}
   </style>
 </head>
 <body>
@@ -119,53 +33,48 @@
     <label for="style">סגנון מועדף</label>
     <input type="text" id="style" name="style" placeholder="לדוגמה: רוק, פופ, קלאסי" />
 
-    <!-- Save button -->
     <button type="button" id="saveSettings" class="save-btn">שמור הגדרות</button>
   </form>
 
   <div class="progress-section">
     <h2>רמת התקדמות בסרטונים</h2>
 
-    <!-- Module 1 -->
+    <!-- מודולים / שיעורים -->
     <div class="module">
       <h3>מודול 1</h3>
-      <div class="lesson"><input type="checkbox" id="m1l1" /><label for="m1l1">שיעור 1</label></div>
-      <div class="lesson"><input type="checkbox" id="m1l2" /><label for="m1l2">שיעור 2</label></div>
-      <div class="lesson"><input type="checkbox" id="m1l3" /><label for="m1l3">שיעור 3</label></div>
-      <div class="lesson"><input type="checkbox" id="m1l4" /><label for="m1l4">שיעור 4</label></div>
-      <div class="lesson"><input type="checkbox" id="m1l5" /><label for="m1l5">שיעור 5</label></div>
+      <div class="lesson"><input type="checkbox" id="m1l1"><label for="m1l1">שיעור 1</label></div>
+      <div class="lesson"><input type="checkbox" id="m1l2"><label for="m1l2">שיעור 2</label></div>
+      <div class="lesson"><input type="checkbox" id="m1l3"><label for="m1l3">שיעור 3</label></div>
+      <div class="lesson"><input type="checkbox" id="m1l4"><label for="m1l4">שיעור 4</label></div>
+      <div class="lesson"><input type="checkbox" id="m1l5"><label for="m1l5">שיעור 5</label></div>
     </div>
 
-    <!-- Module 2 -->
     <div class="module">
       <h3>מודול 2</h3>
-      <div class="lesson"><input type="checkbox" id="m2l1" /><label for="m2l1">שיעור 1</label></div>
-      <div class="lesson"><input type="checkbox" id="m2l2" /><label for="m2l2">שיעור 2</label></div>
-      <div class="lesson"><input type="checkbox" id="m2l3" /><label for="m2l3">שיעור 3</label></div>
-      <div class="lesson"><input type="checkbox" id="m2l4" /><label for="m2l4">שיעור 4</label></div>
-      <div class="lesson"><input type="checkbox" id="m2l5" /><label for="m2l5">שיעור 5</label></div>
+      <div class="lesson"><input type="checkbox" id="m2l1"><label for="m2l1">שיעור 1</label></div>
+      <div class="lesson"><input type="checkbox" id="m2l2"><label for="m2l2">שיעור 2</label></div>
+      <div class="lesson"><input type="checkbox" id="m2l3"><label for="m2l3">שיעור 3</label></div>
+      <div class="lesson"><input type="checkbox" id="m2l4"><label for="m2l4">שיעור 4</label></div>
+      <div class="lesson"><input type="checkbox" id="m2l5"><label for="m2l5">שיעור 5</label></div>
     </div>
 
-    <!-- Module 3 -->
     <div class="module">
       <h3>מודול 3</h3>
-      <div class="lesson"><input type="checkbox" id="m3l1" /><label for="m3l1">שיעור 1</label></div>
-      <div class="lesson"><input type="checkbox" id="m3l2" /><label for="m3l2">שיעור 2</label></div>
-      <div class="lesson"><input type="checkbox" id="m3l3" /><label for="m3l3">שיעור 3</label></div>
-      <div class="lesson"><input type="checkbox" id="m3l4" /><label for="m3l4">שיעור 4</label></div>
-      <div class="lesson"><input type="checkbox" id="m3l5" /><label for="m3l5">שיעור 5</label></div>
+      <div class="lesson"><input type="checkbox" id="m3l1"><label for="m3l1">שיעור 1</label></div>
+      <div class="lesson"><input type="checkbox" id="m3l2"><label for="m3l2">שיעור 2</label></div>
+      <div class="lesson"><input type="checkbox" id="m3l3"><label for="m3l3">שיעור 3</label></div>
+      <div class="lesson"><input type="checkbox" id="m3l4"><label for="m3l4">שיעור 4</label></div>
+      <div class="lesson"><input type="checkbox" id="m3l5"><label for="m3l5">שיעור 5</label></div>
     </div>
   </div>
 
   <script>
-    // אסוף את כל הנתונים מהטופס ומהצ'קבוקסים
+    // איסוף נתונים מהטופס ומה-checkbox-ים
     function collectSettings() {
-      const lessons = Array.from(document.querySelectorAll('.lesson input[type="checkbox"]'));
-      const progress = lessons.reduce((acc, checkbox) => {
-        acc[checkbox.id] = checkbox.checked;
-        return acc;
-      }, {});
-
+      const progress = {};
+      document.querySelectorAll('.lesson input[type="checkbox"]').forEach(cb => {
+        progress[cb.id] = cb.checked;
+      });
       return {
         name: document.getElementById('name').value.trim(),
         age: Number(document.getElementById('age').value),
@@ -174,29 +83,44 @@
       };
     }
 
-    // שליחת הנתונים לשרת (בהמשך תעדכן ל־MongoDB)
-    document.getElementById('saveSettings').addEventListener('click', async () => {
+    async function saveSettings() {
       const payload = collectSettings();
 
+      // ולידציה בסיסית
+      if (!payload.name || isNaN(payload.age)) {
+        alert('נא למלא שם וגיל תקין');
+        return;
+      }
+
+      const btn = document.getElementById('saveSettings');
+      btn.disabled = true;
+      btn.textContent = 'שומר...';
+
       try {
-        const response = await fetch('/api/save-settings', {
+        const res = await fetch('/api/save-settings', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          credentials: 'same-origin',        // ⬅️ שולח את ה-cookie של NextAuth
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        if (response.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
           alert('ההגדרות נשמרו בהצלחה');
         } else {
-          alert('אירעה שגיאה בשמירת ההגדרות');
+          alert(`שגיאה: ${data.error || res.status}`);
+          console.error('Server response:', data);
         }
-      } catch (error) {
-        console.error(error);
-        alert('אירעה שגיאה בשמירת ההגדרות');
+      } catch (err) {
+        console.error('Network error:', err);
+        alert('שגיאת רשת – נסה שוב');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'שמור הגדרות';
       }
-    });
+    }
+
+    document.getElementById('saveSettings').addEventListener('click', saveSettings);
   </script>
 </body>
 </html>
