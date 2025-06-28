@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>הגדרות משתמש</title>
   <style>
-    body{font-family:Arial, sans-serif;background:#f4f4f4;padding:1rem;max-width:600px;margin:auto}
+    body{font-family:Arial,sans-serif;background:#f4f4f4;padding:1rem;max-width:600px;margin:auto}
     h1{color:#d94d72;text-align:center;margin-bottom:1.5rem}
     form,.progress-section{background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1);padding:1.5rem;margin-bottom:2rem}
     label{display:block;margin-bottom:.75rem;font-weight:bold;color:#555}
@@ -57,30 +57,51 @@
       <div class="lesson"><input type="checkbox" id="m2l4"><label for="m2l4">שיעור 4</label></div>
       <div class="lesson"><input type="checkbox" id="m2l5"><label for="m2l5">שיעור 5</label></div>
     </div>
-
-   
   </div>
 
   <script>
-    // איסוף נתונים מהטופס ומה-checkbox-ים
+    // ---------------------- טעינת נתונים קיימים ----------------------
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/get-settings', { cache: 'no-store' });
+        if (!res.ok) return; // אין נתונים – משאיר ריק
+        const data = await res.json();
+
+        // מילוי שדות בסיסיים
+        document.getElementById('name').value  = data.name  ?? '';
+        document.getElementById('age').value   = data.age   ?? '';
+        document.getElementById('style').value = data.style ?? '';
+
+        // סימון שיעורים שהושלמו
+        if (data.progress) {
+          Object.entries(data.progress).forEach(([id, val]) => {
+            const cb = document.getElementById(id);
+            if (cb) cb.checked = !!val;
+          });
+        }
+      } catch (err) {
+        console.error('Load settings failed:', err);
+      }
+    }
+
+    // ---------------------- הקפצת נתונים מהטופס ----------------------
     function collectSettings() {
       const progress = {};
       document.querySelectorAll('.lesson input[type="checkbox"]').forEach(cb => {
         progress[cb.id] = cb.checked;
       });
       return {
-        name: document.getElementById('name').value.trim(),
-        age: Number(document.getElementById('age').value),
+        name:  document.getElementById('name').value.trim(),
+        age:   Number(document.getElementById('age').value),
         style: document.getElementById('style').value.trim(),
         userId: 'dekel testid',
         progress
       };
     }
 
+    // ---------------------- שמירת נתונים ----------------------
     async function saveSettings() {
       const payload = collectSettings();
-
-      // ולידציה בסיסית
       if (!payload.name || isNaN(payload.age)) {
         alert('נא למלא שם וגיל תקין');
         return;
@@ -93,7 +114,6 @@
       try {
         const res = await fetch('/api/save-settings', {
           method: 'POST',
-       
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
@@ -114,6 +134,8 @@
       }
     }
 
+    // הרצת טעינה בעת טעינת הדף
+    document.addEventListener('DOMContentLoaded', loadSettings);
     document.getElementById('saveSettings').addEventListener('click', saveSettings);
   </script>
 </body>
