@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET')
     return res.status(405).json({ error: 'Method Not Allowed' });
 
-  const userId = 'dekel testid';              // קבוע לבדיקות
+  const userId = req.query.userId;              // קבוע לבדיקות
   console.log('🔍 מחפש מסמך עם _id =', userId);
 
   const client = new MongoClient(uri);
