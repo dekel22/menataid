@@ -43,19 +43,21 @@
 
   <script>
     /*— 1. הצגת הפרמטר name (אם קיים) —*/
-    (() => {
-      const params   = new URLSearchParams(location.search);
-      const nameFromURL = params.get('name');
-      if (nameFromURL) sessionStorage.setItem('name', nameFromURL);
-      const savedName = sessionStorage.getItem('name');
-      if (savedName) document.getElementById('username').textContent = ' ' + savedName;
-    })();
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof window !== 'undefined' && 'sessionStorage' in window) {
+        const params   = new URLSearchParams(location.search);
+        const nameFromURL = params.get('name');
+        if (nameFromURL) sessionStorage.setItem('name', nameFromURL);
+        const savedName  = sessionStorage.getItem('name');
+        if (savedName) document.getElementById('username').textContent = ' ' + savedName;
+      }
+    });
 
     /*— 2. Decode JWT safely —*/
     function parseJwt(token){
       try{
         const base64=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
-        const json=decodeURIComponent(atob(base64).split('').map(c=>'%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        const json=decodeURIComponent(atob(base64).split('').map(c=>'%''+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
         return JSON.parse(json);
       }catch{return{};}
     }
@@ -70,28 +72,41 @@
       btn.addEventListener('click',h);
     }
 
-    /*— 4. Ask /api/get-settings if the user exists —*/
-    async function checkUserAndRoute(email){
+    /*— 4. שמירת ההגדרות כשמשוחזרות מהשרת —*/
+    function saveSettingsToSession(settings){
       try{
-        const res=await fetch(`/api/get-settings?userId=${encodeURIComponent(email)}`);
-        if(res.ok){
-          showPopup(`ברוך/ה הבא/ה, ${email}!`,()=>window.location.href='/mainpage.html');
-        }else if(res.status===404){
-          showPopup('משתמש חדש! נעבור להגדרות.',()=>window.location.href='/settings.html');
-        }else if(res.status===405){
-          console.error('Method not allowed – בקשת GET בלבד');
-          showPopup('דרישת שרת לא נתמכת.',()=>window.location.href='/settings.html');
-        }else{
-          console.error('Unexpected status',res.status);
-          showPopup('שגיאה בשרת, נמשיך להגדרות.',()=>window.location.href='/settings.html');
-        }
-      }catch(err){
-        console.error('Fetch error',err);
-        showPopup('אין תקשורת, ננסה שוב מאוחר יותר.',()=>window.location.reload());
+        sessionStorage.setItem('userSettings', JSON.stringify(settings));
+      }catch(e){
+        console.warn('⚠️  לא ניתן לשמור הגדרות ל-sessionStorage', e);
       }
     }
 
-    /*— 5. Google credential callback —*/
+    /*— 5. Ask /api/get-settings if the user exists —*/
+    async function checkUserAndRoute(email){
+      try{
+        const res = await fetch(`/api/get-settings?userId=${encodeURIComponent(email)}`);
+        if(res.ok){
+          const settings = await res.json();          // <<— קיבלנו את ההגדרות
+          saveSettingsToSession(settings);            // <<— שומרים אותן
+          const display = settings.displayName || email;
+          showPopup(`ברוך/ה הבא/ה, ${display}!`, () => window.location.href='/mainpage.html');
+        }else if(res.status===404){
+          sessionStorage.removeItem('userSettings');  // שלא יהיה טעות
+          showPopup('משתמש חדש! נעבור להגדרות.', () => window.location.href='/settings.html');
+        }else if(res.status===405){
+          console.error('Method not allowed – בקשת GET בלבד');
+          showPopup('דרישת שרת לא נתמכת.', () => window.location.href='/settings.html');
+        }else{
+          console.error('Unexpected status',res.status);
+          showPopup('שגיאה בשרת, נמשיך להגדרות.', () => window.location.href='/settings.html');
+        }
+      }catch(err){
+        console.error('Fetch error',err);
+        showPopup('אין תקשורת, ננסה שוב מאוחר יותר.', () => window.location.reload());
+      }
+    }
+
+    /*— 6. Google credential callback —*/
     function handleCredentialResponse(resp){
       const {email}=parseJwt(resp.credential);
       if(!email){showPopup('לא ניתן לאמת מייל',()=>{});return;}
@@ -99,7 +114,7 @@
       checkUserAndRoute(email);
     }
 
-    /*— 6. Init Google Identity button —*/
+    /*— 7. Init Google Identity button —*/
     window.onload=()=>{
       google.accounts.id.initialize({
         client_id:'181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com',
