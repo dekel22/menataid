@@ -60,11 +60,19 @@
   </div>
 
   <script>
-    // ---------------------- טעינת נתונים קיימים ----------------------
+    /* ======== 0. אחזור המייל מה-session ========= */
+    const userEmail = sessionStorage.getItem('userEmail');
+    if (!userEmail) {
+      // אם אין מייל – המשתמש לא מחובר → הפניה חזרה לעמוד הכניסה
+      window.location.href = '/';
+    }
+
+    /* ======== 1. טעינת נתונים קיימים ========= */
     async function loadSettings() {
       try {
-        const res = await fetch('/api/get-settings', { cache: 'no-store' });
-        if (!res.ok) return; // אין נתונים – משאיר ריק
+        const res = await fetch(`/api/get-settings?userId=${encodeURIComponent(userEmail)}`,
+                                { cache: 'no-store' });
+        if (!res.ok) return;                     // אין נתונים – משאיר ריק
         const data = await res.json();
 
         // מילוי שדות בסיסיים
@@ -84,22 +92,22 @@
       }
     }
 
-    // ---------------------- הקפצת נתונים מהטופס ----------------------
+    /* ======== 2. איסוף נתונים מהטופס ========= */
     function collectSettings() {
       const progress = {};
       document.querySelectorAll('.lesson input[type="checkbox"]').forEach(cb => {
         progress[cb.id] = cb.checked;
       });
       return {
+        userId: userEmail,                    // ← משתמש במייל כ-_id
         name:  document.getElementById('name').value.trim(),
         age:   Number(document.getElementById('age').value),
         style: document.getElementById('style').value.trim(),
-        userId: 'dekel testid',
         progress
       };
     }
 
-    // ---------------------- שמירת נתונים ----------------------
+    /* ======== 3. שמירת נתונים ========= */
     async function saveSettings() {
       const payload = collectSettings();
       if (!payload.name || isNaN(payload.age)) {
@@ -117,7 +125,6 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
         const data = await res.json().catch(() => ({}));
         if (res.ok) {
           alert('ההגדרות נשמרו בהצלחה');
@@ -134,7 +141,7 @@
       }
     }
 
-    // הרצת טעינה בעת טעינת הדף
+    /* ======== 4. מאזינים ========= */
     document.addEventListener('DOMContentLoaded', loadSettings);
     document.getElementById('saveSettings').addEventListener('click', saveSettings);
   </script>
