@@ -2,36 +2,38 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>Google Login – Popup + DB Check</title>
+  <title>Google Login – Popup + DB Check</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- COOP מרוכך כדי לאפשר postMessage מה‑popup -->
-  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" />
-  <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none" />
+  <!-- COOP מרוכך כדי לאפשר postMessage מה-popup -->
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
+  <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none">
 
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
     body{margin:0;font-family:Arial, sans-serif;background:#f3f4f6;text-align:center}
-    .header{background:#f66da0;color:#fff;font-weight:bold;padding:1rem}
+    .header{background:#f66da0;color:#fff;font-weight:bold;padding:1rem;text-align:right}
     .sub-header{background:#d2f3f9;padding:1rem;font-size:1.2rem}
     .login-box{background:#fff;margin:2rem auto;padding:2rem;max-width:400px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
-    /* פופ‑אפ פשוט */
+    /* פופ-אפ פשוט */
     #popupOverlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:9999}
     #popup{background:#fff;border-radius:12px;max-width:320px;padding:1.5rem;box-shadow:0 4px 12px rgba(0,0,0,.3)}
     #popup button{margin-top:1rem;padding:.5rem 1rem;border:none;border-radius:6px;background:#f66da0;color:#fff;font-weight:bold;cursor:pointer}
   </style>
 </head>
 <body>
-  <div class="header">ברוכים הבאים</div>
-  <div class="sub-header">התחבר/י עם חשבון Google</div>
+  <div class="header">
+    ברוכים הבאים<span id="username"></span>
+  </div>
+  <div class="sub-header">התחבר/י עם חשבון Google</div>
 
   <div class="login-box">
     <div id="signInDiv"></div>
   </div>
 
-  <!-- פופ‑אפ -->
+  <!-- פופ-אפ -->
   <div id="popupOverlay">
     <div id="popup">
       <p id="popupMsg"></p>
@@ -40,7 +42,16 @@
   </div>
 
   <script>
-    /** Decode JWT safely */
+    /*— 1. הצגת הפרמטר name (אם קיים) —*/
+    (() => {
+      const params   = new URLSearchParams(location.search);
+      const nameFromURL = params.get('name');
+      if (nameFromURL) sessionStorage.setItem('name', nameFromURL);
+      const savedName = sessionStorage.getItem('name');
+      if (savedName) document.getElementById('username').textContent = ' ' + savedName;
+    })();
+
+    /*— 2. Decode JWT safely —*/
     function parseJwt(token){
       try{
         const base64=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
@@ -49,7 +60,7 @@
       }catch{return{};}
     }
 
-    /** Mini popup helper */
+    /*— 3. Mini popup helper —*/
     function showPopup(msg,cb){
       const ov=document.getElementById('popupOverlay');
       document.getElementById('popupMsg').textContent=msg;
@@ -59,16 +70,16 @@
       btn.addEventListener('click',h);
     }
 
-    /** Ask /api/get-settings if the user exists */
+    /*— 4. Ask /api/get-settings if the user exists —*/
     async function checkUserAndRoute(email){
       try{
-        const res=await fetch(`/api/get-settings?userId=${encodeURIComponent(email)}`); // GET, same handler
+        const res=await fetch(`/api/get-settings?userId=${encodeURIComponent(email)}`);
         if(res.ok){
           showPopup(`ברוך/ה הבא/ה, ${email}!`,()=>window.location.href='/mainpage.html');
         }else if(res.status===404){
           showPopup('משתמש חדש! נעבור להגדרות.',()=>window.location.href='/settings.html');
         }else if(res.status===405){
-          console.error('Method not allowed → וודא שהבקשה היא GET');
+          console.error('Method not allowed – בקשת GET בלבד');
           showPopup('דרישת שרת לא נתמכת.',()=>window.location.href='/settings.html');
         }else{
           console.error('Unexpected status',res.status);
@@ -80,6 +91,7 @@
       }
     }
 
+    /*— 5. Google credential callback —*/
     function handleCredentialResponse(resp){
       const {email}=parseJwt(resp.credential);
       if(!email){showPopup('לא ניתן לאמת מייל',()=>{});return;}
@@ -87,6 +99,7 @@
       checkUserAndRoute(email);
     }
 
+    /*— 6. Init Google Identity button —*/
     window.onload=()=>{
       google.accounts.id.initialize({
         client_id:'181683898823-avo330lnmj7d79a88q6rs98u7qefq9eo.apps.googleusercontent.com',
