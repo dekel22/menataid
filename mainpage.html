@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>מניעת אובדן - סימולציה</title>
+  <title>מניעת אובדן – סימולציה</title>
 
   <style>
     body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6}
 
-    /* ─────────────  NAVBAR  ───────────── */
+    /* ───── NAVBAR ───── */
     .navbar{
       background:#fff;
       border-radius:0 0 8px 8px;
@@ -29,7 +29,7 @@
       padding:0;
       display:flex;
       gap:1rem;
-      flex-direction:row-reverse;      /* RTL order */
+      flex-direction:row-reverse; /* RTL */
     }
     .navbar a{
       text-decoration:none;
@@ -38,12 +38,12 @@
     }
     .navbar a:hover{color:#d94d72}
 
-    /* ─────────────  PAGE BASICS  ───────────── */
+    /* ───── PAGE BASICS ───── */
     .header{background:#f66da0;color:#fff;padding:1rem;text-align:center;font-weight:bold}
     .sub-header{background:#d2f3f9;text-align:center;padding:1rem;font-size:1.2rem}
     .question{font-size:1.5rem;color:#d94d72;margin:1rem auto;text-align:center;font-weight:bold}
 
-    /* ─────────────  CARDS  ───────────── */
+    /* ───── CARDS ───── */
     .card{
       background:#fff;
       border-radius:20px;
@@ -63,49 +63,41 @@
     }
     .text-content{flex:1}
 
-    /* ─────────────  BUTTONS  ───────────── */
+    /* ───── BUTTONS ───── */
     .button-container{text-align:center;margin:2rem}
     .back-button{
-      background:#f66da0;
-      border:none;
-      color:#fff;
-      padding:.8rem 2rem;
-      border-radius:40px;
-      font-size:1rem;
-      cursor:pointer;
+      background:#f66da0;border:none;color:#fff;
+      padding:.8rem 2rem;border-radius:40px;
+      font-size:1rem;cursor:pointer;
     }
     .input-button{
-      background:#fff;
-      color:#f66da0;
-      border:2px solid #f66da0;
-      border-radius:40px;
-      padding:.8rem 2rem;
-      font-size:1rem;
-      cursor:pointer;
+      background:#fff;color:#f66da0;
+      border:2px solid #f66da0;border-radius:40px;
+      padding:.8rem 2rem;font-size:1rem;cursor:pointer;
     }
   </style>
 </head>
 <body>
-  <!-- ░░░░░░  NAVBAR  ░░░░░░ -->
+  <!-- ░░░ NAVBAR ░░░ -->
   <nav class="navbar">
-    <span class="welcome">ברוך הבא</span>
+    <span class="welcome"></span>
     <ul>
       <li><a href="settings.html">הגדרות</a></li>
       <li><a href="tel:1201">התקשר לער"ן</a></li>
     </ul>
   </nav>
 
-  <!-- ░░░░░░  PAGE CONTENT  ░░░░░░ -->
-  <div class="header">מניעת אובדן - סימולציה</div>
+  <!-- ░░░ PAGE CONTENT ░░░ -->
+  <div class="header">מניעת אובדן – סימולציה</div>
   <div class="sub-header">מה תרצי לעשות היום?</div>
   <div class="question">?</div>
 
-  <!-- כרטיסי תפריט ראשי -->
+  <!-- כרטיסי תפריט -->
   <div class="card">
     <div class="icon-circle">▶️</div>
     <div class="text-content">
       <strong><a href="videos.html" style="color:inherit;text-decoration:none;">להמשיך לצפות בקורס</a></strong><br>
-      המשיכי בדיוק מהנקודה שהפסקת. שיעורים קצרים, הסברים בגובה העיניים, ודוגמאות מהחיים ומהשטח.
+      המשיכי בדיוק מהנקודה שהפסקת – שיעורים קצרים והסברים בגובה העיניים.
     </div>
   </div>
 
@@ -114,7 +106,7 @@
       <div class="icon-circle">💬</div>
       <div class="text-content">
         <strong>לתרגל סימולציות</strong><br>
-        תרגול שיחות עם דמויות שונות במצבי אמת. תוכלי לבחור נושא (חרדה, עצב, פגיעה עצמית ועוד) ולתרגל תגובות עם משוב מידי.
+        שיחות עם דמויות שונות במצבי אמת, עם משוב מידי.
       </div>
     </div>
   </a>
@@ -123,33 +115,40 @@
     <div class="icon-circle">🤖</div>
     <div class="text-content">
       <strong>לדבר עם בוט</strong><br>
-      יש לך שאלה לפרוק או דילמה לשתף? הבוט כאן להקשיב ולעזור (לא מחליף איש מקצוע).
+      לפרוק או להתייעץ – הבוט כאן תמיד (לא מחליף איש מקצוע).
     </div>
   </div>
 
-  <!-- כרטיס להגדרות -->
   <a href="settings.html" style="text-decoration:none;color:inherit;">
     <div class="card">
       <div class="icon-circle">⚙️</div>
       <div class="text-content">
         <strong>הגדרות משתמש</strong><br>
-        עדכוני פרטים, העדפות והתקדמות בלחיצה אחת.
+        עדכון פרטים והעדפות בלחיצה אחת.
       </div>
     </div>
   </a>
 
-  <!-- כפתורים תחתונים -->
+  <!-- כפתורי תחתית -->
   <div class="button-container">
     <button class="back-button">⬅️</button>
     <button class="input-button">שאלות? שאלו אותי</button>
   </div>
 
-  <!-- ░░░░░░  SCRIPT  ░░░░░░ -->
+  <!-- ░░░ SCRIPT ░░░ -->
   <script>
+    /**
+     * מציג רק את הערך ששמור תחת המפתח 'name'
+     * אם לא קיים – לא מוצג כלום (אפשר לשנות להודעה ברירת-מחדל במידת הצורך)
+     */
     document.addEventListener('DOMContentLoaded', () => {
-      const savedName = sessionStorage.getItem('name');
+      const savedName = sessionStorage.getItem('name');   // השם שאוחסן בעבר
       const el = document.querySelector('.welcome');
-      if (el && savedName) el.textContent = `ברוך הבא, ${savedName}`;
+      if (el && savedName) {
+        el.textContent = savedName;                      // רק השם
+      } else {
+        console.warn('⚠️  name not found in sessionStorage');
+      }
     });
   </script>
 </body>
