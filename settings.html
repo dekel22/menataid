@@ -131,7 +131,7 @@
         const data = await res.json().catch(() => ({}));
         if (res.ok) {
           // שמירת השם ב-session גם לאחר עדכון
-          sessionStorage.setItem('userName', payload.name);
+          sessionStorage.setItem('name', data.name);
           alert('ההגדרות נשמרו בהצלחה');
         } else {
           alert(`שגיאה: ${data.error || res.status}`);
