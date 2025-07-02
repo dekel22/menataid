@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       console.log('❗️לא נמצא _id:', userId);
       return res.status(404).json({ error: '_id not found' });
     }
-
+    sessionStorage.setItem('name', new URLSearchParams(location.search).get('name'));
     return res.status(200).json(doc);
   } catch (err) {
     console.error('Mongo error:', err);
