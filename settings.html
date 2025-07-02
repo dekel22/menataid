@@ -80,6 +80,9 @@
         document.getElementById('age').value   = data.age   ?? '';
         document.getElementById('style').value = data.style ?? '';
 
+        // שמירת השם ב-session לשימוש בדפים אחרים
+        if (data.name) sessionStorage.setItem('userName', data.name);
+
         // סימון שיעורים שהושלמו
         if (data.progress) {
           Object.entries(data.progress).forEach(([id, val]) => {
@@ -127,6 +130,8 @@
         });
         const data = await res.json().catch(() => ({}));
         if (res.ok) {
+          // שמירת השם ב-session גם לאחר עדכון
+          sessionStorage.setItem('userName', payload.name);
           alert('ההגדרות נשמרו בהצלחה');
         } else {
           alert(`שגיאה: ${data.error || res.status}`);
