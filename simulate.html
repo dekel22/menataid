@@ -45,9 +45,6 @@
                          border-top-color:var(--wa-light);border-right:none;transform:translateY(4px);}
     .bot .bubble:before{content:'';position:absolute;top:0;left:-6px;border:6px solid transparent;
                         border-top-color:#fff;border-left:none;transform:translateY(4px);}
-    .feedback .bubble{background:#d8eeff;}
-    .feedback .bubble:before{content:'';position:absolute;top:0;left:-6px;border:6px solid transparent;
-                             border-top-color:#d8eeff;border-left:none;transform:translateY(4px);}
     .evaluation .bubble{background:#fff2b8;font-style:italic;}
     .evaluation .bubble:before{content:'';position:absolute;top:0;left:-6px;border:6px solid transparent;
                                border-top-color:#fff2b8;border-left:none;transform:translateY(4px);}
@@ -107,34 +104,31 @@
     const sendBtn           = document.getElementById('sendBtn');
     const evaluateBtn       = document.getElementById('evaluateBtn');
 
-    /* SCENARIOS – prompts מורים לבוט *להמשיך* כ-חבר/ה במצוקה */
+    /* SCENARIOS – הבוט מגיב כחבר/ה במצוקה */
     const scenarios={
       "10_student":{
         d:'אחה"צ בכיתה ריקה. תלמיד/ה בלחש: "אין לי עם מי לשחק…"',
-        p:`את/ה החבר/ה במצוקה – ילד/ה בן/בת 10. דבר/י בגוף ראשון, בטון עצוב. 
-           בכל תגובה המשך/י לשתף מה מרגיש לך ולבקש תמיכה, בהתאם לשיחה עד כה.`
+        p:`את/ה החבר/ה במצוקה – ילד/ה בן/בת 10. המשך/י לדבר בגוף ראשון בטון עצוב ולשתף איך את/ה מרגיש/ה.`
       },
       "16_neighbor":{
         d:'ערב בשכונה. מתבגר/ת: "אף אחד לא מבין אותי…"',
-        p:`את/ה החבר/ה במצוקה – מתבגר/ת בן/בת 16. דבר/י בגוף ראשון ופתח/י את הלב. 
-           המשך/י להגיב כאדם במצוקה שקשה לו, לפי ההודעות האחרונות.`
+        p:`את/ה החבר/ה במצוקה – מתבגר/ת בן/בת 16. המשך/י להגיב בגוף ראשון על תחושת הריחוק.`
       },
       "22_classmate":{
         d:'לילה במעונות. חבר/ה: "טובע/ת בחובות…" ',
-        p:`את/ה החבר/ה במצוקה – סטודנט/ית בן/בת 22. המשך/י לשתף בעומס ובלחץך, בגוף ראשון, בהתאם לשיחה.`
+        p:`את/ה החבר/ה במצוקה – סטודנט/ית בן/בת 22. המשך/י לשתף בלחץ ובקושי.`
       },
       "35_colleague":{
         d:'הפסקה בעבודה: "העומס שובר אותי…" ',
-        p:`את/ה החבר/ה במצוקה – עובד/ת בן/בת 35. המשך/י לתאר חנק ולחץ, בגוף ראשון, על בסיס השיחה.`
+        p:`את/ה החבר/ה במצוקה – עובד/ת בן/בת 35. המשך/י לתאר תחושת חנק ומתח.`
       },
       "75_neighbor":{
         d:'צהריים. שכן/ית 75: "הבדידות הורגת…" ',
-        p:`את/ה החבר/ה במצוקה – קשיש/ה בן/בת 75. המשך/י לתאר בדידות וקושי, בגוף ראשון, בהתאם לשיחה עד כה.`
+        p:`את/ה החבר/ה במצוקה – קשיש/ה בן/בת 75. המשך/י לשתף בתחושת בדידות וכאב.`
       }
     };
 
-    /* SYSTEM PROMPTS */
-    const quickFBSystem='אתה מנטור תומך. כתוב משוב חיובי קצר (≤6 מילים).';
+    /* SYSTEM PROMPT for evaluation */
     const summarySystem=`אתה פסיכולוג מדריך. תן סיכום כולל:
 • מחמאה ראשית
 • מה עבד – 3-5 נקודות
@@ -162,8 +156,8 @@
     evaluateBtn.onclick = handleEvaluate;
 
     /* HELPERS */
-    const avatars={user:'😊',feedback:'⭐',bot:'🙁',evaluation:'📝'};
-    const labels ={user:'את/ה',feedback:'משוב',bot:'חבר/ה',evaluation:'סיכום'};
+    const avatars={user:'😊',bot:'🙁',evaluation:'📝'};
+    const labels ={user:'את/ה',bot:'חבר/ה',evaluation:'סיכום'};
 
     function addBubble(role,text){
       const wrap=document.createElement('div');
@@ -181,6 +175,7 @@
       const d=await r.json(); return d.text || '';
     }
 
+    /* SEND */
     async function handleSend(){
       const txt=userInput.value.trim();
       if(!txt) return;
@@ -189,12 +184,7 @@
       messages.push({role:'user',content:txt});
       userInput.value='';
 
-      /* QUICK FEEDBACK */
-      ai({messages:[{role:'system',content:quickFBSystem},{role:'user',content:txt}]})
-        .then(f=>addBubble('feedback',f||'כל הכבוד!'))
-        .catch(()=>{});
-
-      /* FRIEND IN DISTRESS */
+      /* FRIEND IN DISTRESS – bot response */
       const convo=[{role:'system',content:scenarioSystemPrompt}, ...messages];
       ai({messages:convo})
         .then(rep=>{
@@ -204,6 +194,7 @@
         .catch(()=>addBubble('bot','שגיאה 😕'));
     }
 
+    /* EVALUATE */
     async function handleEvaluate(){
       if(!messages.length) return;
       const userMsgs=messages.filter(m=>m.role==='user').map(m=>({role:'user',content:m.content}));
