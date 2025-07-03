@@ -98,22 +98,39 @@
   <!-- SCRIPT -->
   <script>
     /* ELEMENTS */
-    const scenarioSelect=document.getElementById('scenarioSelect');
-    const scenarioContainer=document.getElementById('scenarioContainer');
-    const chatContainer=document.getElementById('chatContainer');
-    const instructionsDiv=document.getElementById('instructionsDiv');
-    const chat=document.getElementById('chat');
-    const userInput=document.getElementById('userInput');
-    const sendBtn=document.getElementById('sendBtn');
-    const evaluateBtn=document.getElementById('evaluateBtn');
+    const scenarioSelect    = document.getElementById('scenarioSelect');
+    const scenarioContainer = document.getElementById('scenarioContainer');
+    const chatContainer     = document.getElementById('chatContainer');
+    const instructionsDiv   = document.getElementById('instructionsDiv');
+    const chat              = document.getElementById('chat');
+    const userInput         = document.getElementById('userInput');
+    const sendBtn           = document.getElementById('sendBtn');
+    const evaluateBtn       = document.getElementById('evaluateBtn');
 
-    /* SCENARIOS */
+    /* SCENARIOS – prompts מורים לבוט *להמשיך* כ-חבר/ה במצוקה */
     const scenarios={
-      "10_student":{d:'אחה"צ בכיתה ריקה. תלמיד/ה בלחש: "אין לי עם מי לשחק…"',p:'את/ה תלמיד/ה בן/בת 10 שמרגיש/ה לבד.'},
-      "16_neighbor":{d:'ערב בשכונה. מתבגר/ת: "אף אחד לא מבין אותי…"',p:'את/ה מתבגר/ת בן/בת 16 בתחושת ריחוק.'},
-      "22_classmate":{d:'לילה במעונות. חבר/ה: "טובע/ת בחובות…" ',p:'את/ה סטודנט/ית בן/בת 22 מוצף/ת.'},
-      "35_colleague":{d:'הפסקה בעבודה: "העומס שובר אותי…"',p:'את/ה עובד/ת בן/בת 35 במתח גבוה.'},
-      "75_neighbor":{d:'צהריים. שכן/ית 75: "הבדידות הורגת…" ',p:'את/ה קשיש/ה בן/בת 75 בבדידות.'}
+      "10_student":{
+        d:'אחה"צ בכיתה ריקה. תלמיד/ה בלחש: "אין לי עם מי לשחק…"',
+        p:`את/ה החבר/ה במצוקה – ילד/ה בן/בת 10. דבר/י בגוף ראשון, בטון עצוב. 
+           בכל תגובה המשך/י לשתף מה מרגיש לך ולבקש תמיכה, בהתאם לשיחה עד כה.`
+      },
+      "16_neighbor":{
+        d:'ערב בשכונה. מתבגר/ת: "אף אחד לא מבין אותי…"',
+        p:`את/ה החבר/ה במצוקה – מתבגר/ת בן/בת 16. דבר/י בגוף ראשון ופתח/י את הלב. 
+           המשך/י להגיב כאדם במצוקה שקשה לו, לפי ההודעות האחרונות.`
+      },
+      "22_classmate":{
+        d:'לילה במעונות. חבר/ה: "טובע/ת בחובות…" ',
+        p:`את/ה החבר/ה במצוקה – סטודנט/ית בן/בת 22. המשך/י לשתף בעומס ובלחץך, בגוף ראשון, בהתאם לשיחה.`
+      },
+      "35_colleague":{
+        d:'הפסקה בעבודה: "העומס שובר אותי…" ',
+        p:`את/ה החבר/ה במצוקה – עובד/ת בן/בת 35. המשך/י לתאר חנק ולחץ, בגוף ראשון, על בסיס השיחה.`
+      },
+      "75_neighbor":{
+        d:'צהריים. שכן/ית 75: "הבדידות הורגת…" ',
+        p:`את/ה החבר/ה במצוקה – קשיש/ה בן/בת 75. המשך/י לתאר בדידות וקושי, בגוף ראשון, בהתאם לשיחה עד כה.`
+      }
     };
 
     /* SYSTEM PROMPTS */
@@ -129,17 +146,23 @@
     let scenarioSystemPrompt='';
 
     /* EVENTS */
-    scenarioSelect.onchange=()=>{const k=scenarioSelect.value;if(!k)return;
-      scenarioContainer.style.display='none';chatContainer.style.display='flex';
-      instructionsDiv.textContent=scenarios[k].d;messages=[];scenarioSystemPrompt=scenarios[k].p;
-      userInput.focus();};
+    scenarioSelect.onchange=()=>{
+      const k=scenarioSelect.value;
+      if(!k) return;
+      scenarioContainer.style.display='none';
+      chatContainer.style.display='flex';
+      instructionsDiv.textContent=scenarios[k].d;
+      messages=[];
+      scenarioSystemPrompt=scenarios[k].p.trim();
+      userInput.focus();
+    };
 
-    sendBtn.onclick=handleSend;
-    userInput.onkeyup=e=>{if(e.key==='Enter')handleSend();};
-    evaluateBtn.onclick=handleEvaluate;
+    sendBtn.onclick   = handleSend;
+    userInput.onkeyup = e=>{if(e.key==='Enter') handleSend();};
+    evaluateBtn.onclick = handleEvaluate;
 
     /* HELPERS */
-    const avatars={user:'😊',feedback:'⭐',bot:'🙁',evaluation:'📝'};  /*   ←  no robot icon   */
+    const avatars={user:'😊',feedback:'⭐',bot:'🙁',evaluation:'📝'};
     const labels ={user:'את/ה',feedback:'משוב',bot:'חבר/ה',evaluation:'סיכום'};
 
     function addBubble(role,text){
@@ -155,22 +178,30 @@
 
     async function ai(payload){
       const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      const d=await r.json();return d.text||'';
+      const d=await r.json(); return d.text || '';
     }
 
     async function handleSend(){
-      const txt=userInput.value.trim(); if(!txt) return;
-      addBubble('user',txt); messages.push({role:'user',content:txt}); userInput.value='';
+      const txt=userInput.value.trim();
+      if(!txt) return;
+
+      addBubble('user',txt);
+      messages.push({role:'user',content:txt});
+      userInput.value='';
 
       /* QUICK FEEDBACK */
       ai({messages:[{role:'system',content:quickFBSystem},{role:'user',content:txt}]})
-        .then(f=>addBubble('feedback',f||'כל הכבוד!')).catch(()=>{});
+        .then(f=>addBubble('feedback',f||'כל הכבוד!'))
+        .catch(()=>{});
 
       /* FRIEND IN DISTRESS */
       const convo=[{role:'system',content:scenarioSystemPrompt}, ...messages];
-      ai({messages:convo}).then(rep=>{
-        addBubble('bot',rep||'…'); messages.push({role:'assistant',content:rep});
-      }).catch(()=>addBubble('bot','שגיאה 😕'));
+      ai({messages:convo})
+        .then(rep=>{
+          addBubble('bot',rep||'…');
+          messages.push({role:'assistant',content:rep});
+        })
+        .catch(()=>addBubble('bot','שגיאה 😕'));
     }
 
     async function handleEvaluate(){
