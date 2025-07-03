@@ -3,133 +3,218 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>סימולציית מצוקה</title>
+  <title>סימולציית מצוקה – סגנון וואטסאפ</title>
+
+  <!-- ======  BASIC WA-LIKE STYLING  ====== -->
   <style>
-    body{
-      font-family:Arial,sans-serif;
-      background:#f4f4f4;
-      padding:1rem;
-      max-width:650px;
-      margin:auto;
+    :root{
+      --wa-green:#00a884;          /* navbar / buttons */
+      --wa-light:#dcf8c6;          /* outgoing bubble */
+      --wa-bg:#eae6df;             /* chat background */
+      --avatar-size:34px;
     }
 
-    /* ----------  TOP NAV  ---------- */
+    body{
+      font-family:"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--wa-bg);
+      margin:0;
+      display:flex;
+      justify-content:center;
+      padding:2vh 0;
+    }
+
+    /* phone mock */
+    .phone{
+      width:370px;
+      max-width:95vw;
+      background:#fff;
+      border-radius:22px;
+      box-shadow:0 0 18px rgba(0,0,0,.2);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      height:92vh;
+    }
+
+    /* ===== TOP BAR (with call & back) ===== */
     .top-nav{
+      background:var(--wa-green);
+      color:#fff;
       display:flex;
       flex-direction:row-reverse; /* RTL */
+      align-items:center;
       gap:1rem;
-      background:#fff;
-      border-radius:0 0 8px 8px;
-      box-shadow:0 2px 5px rgba(0,0,0,.08);
-      padding:.75rem 1rem;
-      margin-bottom:1rem;
+      padding:.7rem 1rem;
     }
     .top-nav a{
-      color:#d94d72;
-      font-weight:bold;
+      color:#fff;
       text-decoration:none;
+      font-weight:bold;
+      font-size:.95rem;
     }
-    .top-nav a:hover,.top-nav a:focus{ text-decoration:underline; }
 
-    h1{ color:#d94d72;text-align:center; }
+    /* ===== HEADER TITLE ===== */
+    h1{
+      display:none; /* hidden – WA style uses only top bar */
+    }
 
-    /* Selector ------------------------------------------------------------ */
-    #scenarioContainer{ display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem; }
-    select{
-      padding:.75rem;
-      font-size:1rem;
+    /* ===== SCENARIO SELECTOR ===== */
+    #scenarioContainer{
+      background:#f0f2f5;
+      padding:1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+    }
+    #scenarioContainer select{
+      padding:.6rem .9rem;
       border-radius:8px;
       border:1px solid #ccc;
+      font-size:.95rem;
       background:#fff;
     }
 
-    /* Chat area ----------------------------------------------------------- */
-    #chatContainer{ display:none;flex-direction:column;gap:.5rem; }
-    #instructionsDiv{
-      background:#fff;
-      border-radius:8px;
-      box-shadow:0 2px 5px rgba(0,0,0,.08);
-      padding:1rem;
-      color:#444;
-      margin-bottom:.5rem;
-      white-space:pre-wrap;
+    /* ===== CHAT WINDOW ===== */
+    #chatContainer{
+      flex:1;
+      display:none;
+      flex-direction:column;
+      background:url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2VhZTdkZiIvPjwvc3ZnPg==') repeat; /* light pattern */
+      overflow:auto;
+      padding:1rem .6rem 1rem .6rem;
     }
-    #chat{
-      background:#fff;
-      border-radius:8px;
-      box-shadow:0 2px 5px rgba(0,0,0,.1);
-      padding:1rem;
-      min-height:320px;
-      overflow-y:auto;
-    }
+
+    /* ===== MESSAGE BUBBLE WRAPPER ===== */
     .message{
-      margin:.5rem 0;
-      padding:.75rem .9rem;
-      border-radius:10px;
-      max-width:90%;
+      display:flex;
+      gap:.4rem;
+      margin:.4rem 0;
+      max-width:80%;
+      font-size:.9rem;
       line-height:1.4;
     }
-    .user{ background:#cff5d3;color:#064b1b;text-align:right;margin-left:auto; }
-    .bot{  background:#ffd6df;color:#5a1024;text-align:left;margin-right:auto; }
-    .evaluation{ background:#fff2b8;color:#664600;text-align:left;margin-right:auto;font-style:italic; }
-    .feedback{   background:#d8eeff;color:#084b7c;text-align:left;margin-right:auto;font-size:.85rem;font-style:italic; }
+    /* avatar circle */
+    .avatar{
+      width:var(--avatar-size);
+      height:var(--avatar-size);
+      border-radius:50%;
+      background:#fff;
+      color:#555;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.1rem;
+      flex:0 0 var(--avatar-size);
+      box-shadow:0 0 2px rgba(0,0,0,.2);
+    }
+    /* bubble common */
+    .bubble{
+      padding:.55rem .9rem;
+      border-radius:7.5px;
+      position:relative;
+      word-wrap:break-word;
+      background:#fff;
+    }
 
-    #inputContainer{ display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap; }
+    /* outgoing (user) */
+    .user{flex-direction:row-reverse;}
+    .user .bubble{background:var(--wa-light);}
+    .user .bubble:before{
+      content:'';
+      position:absolute;top:0;right:-6px;
+      border:6px solid transparent;
+      border-top-color:var(--wa-light);
+      border-right:none;
+      transform:translateY(4px);
+    }
+
+    /* incoming – friend/bot */
+    .bot .bubble{background:#fff;}
+    .bot .bubble:before{
+      content:'';
+      position:absolute;top:0;left:-6px;
+      border:6px solid transparent;
+      border-top-color:#fff;
+      border-left:none;
+      transform:translateY(4px);
+    }
+
+    /* feedback & evaluation */
+    .feedback .bubble{background:#d8eeff;}
+    .evaluation .bubble{
+      background:#fff2b8;
+      font-style:italic;
+    }
+
+    /* ===== INPUT AREA ===== */
+    #inputContainer{
+      display:flex;
+      gap:.4rem;
+      background:#f0f2f5;
+      padding:.5rem .6rem;
+    }
     #userInput{
-      flex:1 1 220px;
-      padding:.75rem;
-      font-size:1rem;
-      border-radius:8px;
-      border:1px solid #ccc;
+      flex:1;
+      border:none;
+      border-radius:20px;
+      padding:.55rem .9rem;
+      font-size:.9rem;
+      outline:none;
     }
     button.primary,button.secondary{
-      padding:.75rem 1rem;
-      font-size:1rem;
       border:none;
-      border-radius:8px;
+      border-radius:50%;
+      width:42px;
+      height:42px;
       color:#fff;
       cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.2rem;
     }
-    button.primary{   background:#d94d72; }
-    button.secondary{ background:#676767; }
+    button.primary{background:var(--wa-green);}
+    button.secondary{background:#888;}
   </style>
 </head>
 <body>
-  <!-- ----------  TOP NAVIGATION ---------- -->
-  <nav class="top-nav">
-    <a href="tel:1201">התקשר לער"ן</a>
-    <a href="mainpage.html">חזרה לתפריט הראשי</a>
-  </nav>
+  <div class="phone">
+    <!-- ===== TOP NAV ===== -->
+    <nav class="top-nav">
+      <a href="tel:1201">📞 ער"ן</a>
+      <a href="mainpage.html">🏠 תפריט</a>
+    </nav>
 
-  <h1>סימולציית מצוקה</h1>
+    <!-- ===== SCENARIO SELECTOR ===== -->
+    <div id="scenarioContainer">
+      <label for="scenarioSelect">בחר/י דמות (גיל + קשר):</label>
+      <select id="scenarioSelect">
+        <option value="" selected disabled>-- בחר/י --</option>
+        <option value="10_student">ילד/ה בן/בת 10 – תלמיד/ה שלך</option>
+        <option value="16_neighbor">מתבגר/ת בן/בת 16 – שכן/ית</option>
+        <option value="22_classmate">צעיר/ה בן/בת 22 – חבר/ת כיתה</option>
+        <option value="35_colleague">מבוגר/ת בן/בת 35 – קולגה</option>
+        <option value="75_neighbor">קשיש/ה בן/בת 75 – שכן/ית</option>
+      </select>
+    </div>
 
-  <!-- ----------  PERSON-TYPE SELECTOR (AGE + RELATION) ---------- -->
-  <div id="scenarioContainer">
-    <label for="scenarioSelect">בחר/י דמות (גיל + קשר):</label>
-    <select id="scenarioSelect">
-      <option value="" selected disabled>-- בחר/י --</option>
-      <option value="10_student">ילד/ה בן/בת 10 – תלמיד/ה שלך</option>
-      <option value="16_neighbor">מתבגר/ת בן/בת 16 – שכן/ית</option>
-      <option value="22_classmate">צעיר/ה בן/בת 22 – חבר/ת כיתה באוניברסיטה</option>
-      <option value="35_colleague">מבוגר/ת בן/בת 35 – קולגה בעבודה</option>
-      <option value="75_neighbor">קשיש/ה בן/בת 75 – שכן/ית ותיק/ה</option>
-    </select>
-  </div>
+    <!-- ===== CHAT AREA ===== -->
+    <div id="chatContainer">
+      <div id="instructionsDiv"></div>
+      <div id="chat"></div>
 
-  <!-- ----------  CHAT AREA ---------- -->
-  <div id="chatContainer">
-    <div id="instructionsDiv"></div>
-    <div id="chat"></div>
-
-    <div id="inputContainer">
-      <input id="userInput" type="text" placeholder="הקלד/י תגובה תומכת..." />
-      <button id="sendBtn" class="primary">שלח</button>
-      <button id="evaluateBtn" class="secondary">להערכה</button>
+      <!-- ===== INPUT BAR ===== -->
+      <div id="inputContainer">
+        <input id="userInput" type="text" placeholder="הקלד/י הודעה…" />
+        <button id="sendBtn" class="primary">➤</button>
+        <button id="evaluateBtn" class="secondary">★</button>
+      </div>
     </div>
   </div>
 
+  <!-- ===== SCRIPT ===== -->
   <script>
-    // === DOM Elements ===
+    // Elements
     const scenarioSelect    = document.getElementById('scenarioSelect');
     const scenarioContainer = document.getElementById('scenarioContainer');
     const chatContainer     = document.getElementById('chatContainer');
@@ -139,158 +224,95 @@
     const sendBtn           = document.getElementById('sendBtn');
     const evaluateBtn       = document.getElementById('evaluateBtn');
 
-    // === Scenario definitions (display + prompt) ===
-    const scenarios = {
-      "10_student": {
-        display: 'אחה"צ בכיתה ריקה. תלמיד/ה בן/בת 10 ניגש/ת אליך בלחש: "אין לי עם מי לשחק…" ',
-        prompt :  'את/ה מגלם/ת תלמיד/ה בן/בת 10 שמרגיש/ה לבד ומבקש/ת עזרה. פתח/י בתחושת בדידות והמשך/י להסביר מה מציק.'
-      },
-      "16_neighbor": {
-        display: 'ערב בשכונה. מתבגר/ת בן/בת 16, שכן/ית, עומד/ת מחוץ לבית ולוחש/ת: "אף אחד לא באמת מבין אותי…" ',
-        prompt :  'את/ה מגלם/ת מתבגר/ת בן/בת 16 שחווה תחושת אי-הבנה בבית ובחברה. פתח/י בתחושת ריחוק והמשך/י לתאר תסכולים.'
-      },
-      "22_classmate": {
-        display: 'לילה מאוחר במעונות. צעיר/ה בן/בת 22, חבר/ת כיתה, שולח/ת הודעה: "אני טובע/ת בחובות ובהגשות…" ',
-        prompt :  'את/ה מגלם/ת סטודנט/ית בן/בת 22 שמרגיש/ה מוצף/ת בלימודים ובחיים. פתח/י בתחושת עומס והמשך/י להסביר.'
-      },
-      "35_colleague": {
-        display: 'הפסקה קצרה בעבודה. קולגה בן/בת 35 לוחש/ת: "העומס הזה שובר אותי…" ',
-        prompt :  'את/ה מגלם/ת מבוגר/ת בן/בת 35 בעומס עבודה כבד. פתח/י בתחושת חנק והמשך/י לתאר לחץ.'
-      },
-      "75_neighbor": {
-        display: 'שעות הצהריים המאוחרות. שכן/ית ותיק/ה בן/בת 75 נאנח/ת: "הבדידות הורגת אותי…" ',
-        prompt :  'את/ה מגלם/ת קשיש/ה בן/בת 75 שסובל/ת מבדידות חריפה. פתח/י בתחושת ריק והמשך/י בנימה כואבת.'
-      }
+    // Scenarios
+    const scenarios={
+      "10_student":{display:'אחה"צ בכיתה ריקה…',prompt:'את/ה תלמיד/ה בן/בת 10…'},
+      "16_neighbor":{display:'ערב בשכונה…',prompt:'את/ה מתבגר/ת בן/בת 16…'},
+      "22_classmate":{display:'לילה במעונות…',prompt:'את/ה סטודנט/ית בן/בת 22…'},
+      "35_colleague":{display:'הפסקה בעבודה…',prompt:'את/ה עובד/ת בן/בת 35…'},
+      "75_neighbor":{display:'שכן/ית ותיק/ה 75…',prompt:'את/ה קשיש/ה בן/בת 75…'}
     };
 
-    // Evaluation prompt (unchanged)
-    const evaluationPrompt = `להלן שלוש דוגמאות להערכה (מבנה, טון ותוכן):
+    // System prompts
+    const quickFBSystem='אתה מנטור תומך. כתוב משוב חיובי קצר (≤6 מילים).';
+    const summarySystem=`אתה פסיכולוג מדריך. תן סיכום:
+• מחמאה
+• מה עבד – 3–5
+• לשיפור – 2–4
+טון מחזק ואמפתי.`;
 
-דוגמא 1
-סצנה: אחרי הלימודים, יושבות על ספסל סמוך לבית הספר. דנה פורצת בבכי: "אני אפס מוחלטת. שוב נכשלתי במבחן."
-חבר/ה תומך/ת: "זה לא הופך אותך לאפס, דנה. ראיתי כמה השקעת. בואי נדבר על זה."
+    let messages=[];
+    let scenarioSystemPrompt='';
 
-דוגמא 2
-סצנה: ערב בבית קפה שקט. יואב מסובב את הכוס ביד רועדת: "הכול מציף אותי, אני עומד להתפוצץ."
-חבר/ה תומך/ת: "שמעתי אותך, יואב. אני כאן. אולי ננשום ביחד כמה נשימות עמוקות?"
-
-דוגמא 3
-סצנה: שיחת וידאו לילית. רוני אומר/ת: "כולם נעלמו לי, אני לבד בעולם."
-חבר/ה תומך/ת: "רוני, זה כואב לשמוע. אני איתך עכשיו, אתה לא לבד."
-
-— — —
-הוראות: כתוב/י פידבק למשתמש (התומך) במבנה הבא בדיוק:
-
-**משוב מסכם:**
-
-
-*מה נעשה נכון:*
-
-• (שלוש-שש נקודות חיוביות)
-
-
-*מה אפשר לשפר:*
-
-• (שתי-ארבע הצעות שיפור קונקרטיות ועדינות)
-
-
-שמור/י על טון אמפתי ומקצועי, קצר ותכליתי.`;
-
-    // === Conversation state ===
-    let messages = [];
-    let scenarioSystemPrompt = '';
-
-    // === Event listeners ===
-    scenarioSelect.addEventListener('change', handleScenarioSelect);
-    sendBtn.addEventListener('click', handleSend);
-    userInput.addEventListener('keyup', e => { if (e.key === 'Enter') handleSend(); });
-    evaluateBtn.addEventListener('click', handleEvaluate);
-
-    // === Functions ===
-    function handleScenarioSelect(){
-      const key = scenarioSelect.value;
-      if(!key || !scenarios[key]) return;
-
-      // Prepare UI
-      scenarioContainer.style.display = 'none';
-      chatContainer.style.display     = 'flex';
-      instructionsDiv.innerHTML       =
-        `<strong>סיטואציה:</strong> ${scenarios[key].display}<br/><br/>`+
-        `<strong>שלבי תוכנית הפעולה:</strong>`+
-        `<ol><li>זיהוי סימני אזהרה</li><li>שאלי לשלומו/ה</li>`+
-        `<li>הקשבה לא-שיפוטית</li><li>חיבור לדמות מבוגרת אחראית</li>`+
-        `<li>הדגשת חשיבות החברות</li></ol>`;
-
-      // Reset state
-      messages = [];
-      scenarioSystemPrompt = scenarios[key].prompt;
+    // Init
+    scenarioSelect.onchange=()=>{
+      const key=scenarioSelect.value;
+      if(!key) return;
+      scenarioContainer.style.display='none';
+      chatContainer.style.display='flex';
+      instructionsDiv.textContent=scenarios[key].display;
+      messages=[];
+      scenarioSystemPrompt=scenarios[key].prompt;
       userInput.focus();
+    };
+
+    sendBtn.onclick=()=>handleSend();
+    userInput.onkeyup=(e)=>{if(e.key==='Enter')handleSend();};
+    evaluateBtn.onclick=()=>handleEvaluate();
+
+    // helpers
+    function addBubble(role,text){
+      const wrap=document.createElement('div');
+      wrap.className=`message ${role}`;
+      // avatar
+      const av=document.createElement('div');
+      av.className='avatar';
+      av.textContent=role==='user'?'😊':role==='bot'?'🤖':role==='feedback'?'⭐':'📝';
+      // bubble
+      const bub=document.createElement('div');
+      bub.className='bubble';
+      bub.textContent=text;
+      // assemble
+      wrap.appendChild(av);
+      wrap.appendChild(bub);
+      chat.appendChild(wrap);
+      chat.scrollTop=chat.scrollHeight;
     }
 
-    function appendMessage(roleClass,text){
-      const div   = document.createElement('div');
-      div.className = `message ${roleClass}`;
-      div.textContent = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+    async function ai(payload){
+      const r=await fetch('/api/chat',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
+      const d=await r.json();
+      return d.text||'';
     }
 
-    async function getQuickFeedback(userText){
-      // AI-generated one-liner feedback (<= 6 words, positive)
-      try{
-        const res = await fetch('/api/chat',{
-          method :'POST',
-          headers:{'Content-Type':'application/json'},
-          body   :JSON.stringify({
-            messages:[
-              {role:'system',content:'אתה מנטור תומך. תן משוב חיובי קצר (עד 6 מילים בעברית) על ההודעה של המשתמש.'},
-              {role:'user',content:userText}
-            ]
-          })
-        });
-        const data = await res.json();
-        const fb   = data.text || '👍 כל הכבוד!';
-        appendMessage('feedback',fb);
-      }catch(err){
-        console.error('Feedback error:',err);
-      }
+    async function handleSend(){
+      const txt=userInput.value.trim();
+      if(!txt)return;
+      addBubble('user',txt);
+      messages.push({role:'user',content:txt});
+      userInput.value='';
+
+      // quick positive fb
+      ai({messages:[{role:'system',content:quickFBSystem},{role:'user',content:txt}]})
+        .then(f=>addBubble('feedback',f||'💪 יפה!')).catch(()=>{});
+
+      // assistant reply
+      const convo=[{role:'system',content:scenarioSystemPrompt},...messages];
+      ai({messages:convo}).then(rep=>{
+        addBubble('bot',rep||'…');
+        messages.push({role:'assistant',content:rep});
+      }).catch(()=>addBubble('bot','שגיאה 😕'));
     }
 
-    function handleSend(){
-      const text = userInput.value.trim();
-      if(!text) return;
-
-      appendMessage('user',text);
-      messages.push({role:'user',content:text});
-      userInput.value = '';
-
-      // --- quick positive feedback ---
-      getQuickFeedback(text);
-
-      // --- assistant reply ---
-      fetchChat([{role:'system',content:scenarioSystemPrompt},...messages],'bot');
-    }
-
-    function handleEvaluate(){
-      if(messages.length===0) return;
-      fetchChat([{role:'system',content:evaluationPrompt},...messages],'evaluation');
-    }
-
-    async function fetchChat(bodyMessages,roleForBubble){
-      try{
-        const res   = await fetch('/api/chat',{
-          method :'POST',
-          headers:{'Content-Type':'application/json'},
-          body   :JSON.stringify({messages:bodyMessages})
-        });
-        const data  = await res.json();
-        const reply = data.text || 'אין תגובה';
-        appendMessage(roleForBubble,reply);
-        messages.push({role:'assistant',content:reply});
-      }catch(err){
-        console.error('API error:',err);
-        appendMessage(roleForBubble,'שגיאה בשליחת הבקשה.');
-      }
+    async function handleEvaluate(){
+      if(!messages.length)return;
+      const userMsgs=messages.filter(m=>m.role==='user').map(m=>({role:'user',content:m.content}));
+      const summary=await ai({messages:[{role:'system',content:summarySystem},...userMsgs]}).catch(()=>null);
+      addBubble('evaluation',summary||'שגיאה בהערכה.');
     }
   </script>
 </body>
